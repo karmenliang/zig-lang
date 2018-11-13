@@ -22,22 +22,20 @@ let rec betastep (e:Expr) : Expr =
         | Variable e1v -> Application(e1, betastep e2)
         | Abstraction(e1v, e1e) -> sub e1v e2 e1e
         | Application(e1',e2') ->
-            // try reducing e1' (left) first
-            let red1 = betastep e1'
-            if e1' <> red1 then Application(red1,e2')
+            // try reducing e1 (left) first
+            let red1 = betastep e1
+            if e1 <> red1 then Application(red1,e2)
             // if not reducible, try reducing e2' (right)
-            else let red2 = betastep e2'
-                 if e2' <> red2 then Application(e1',red2)
+            else let red2 = betastep e2
+                 if e2 <> red2 then Application(e1,red2)
                  // both subexpressions not reducible, return original
                  else e
             
-let betanorm (e:Expr) : Expr =
-    let expr = fst (alphanorm e (fv e) Map.empty)
-    let rec betanorm' (e':Expr) : Expr =
-        let redexpr = betastep e'
-        // in beta-normal form
-        if e' = redexpr then redexpr
-        // not in beta-normal form, continue beta reducing
-        else betanorm' redexpr
-    betanorm' expr
+let rec betanorm (e:Expr) : Expr =
+    let expr = (fst (alphanorm e (fv e) Map.empty))
+    let redexpr = betastep expr
+    // in beta-normal form
+    if expr = redexpr then redexpr
+    // not in beta-normal form, continue beta reducing
+    else betanorm redexpr
     
