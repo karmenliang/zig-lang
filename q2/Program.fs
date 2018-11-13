@@ -19,12 +19,16 @@ let main argv =
     printfn "%s" (lambdaprint (sub v with_e in_e))
 
     // testing betastep #1: e = betastep e, where e is beta-normal
-    let e = Abstraction('x', Variable 'x') // (Lx.x)
-    printfn "%s" (lambdaprint (betastep e))
+    let e1 = Abstraction('x', Variable 'x') // (Lx.x)
+    printfn "%s" (lambdaprint (betastep e1))
 
     // testing betastep #2:
-    let e = Application(Abstraction('x',Application(Variable 'x', Variable 'y')), Abstraction('z', Application(Variable 'z', Variable 'y'))) // ((Lx.(xy))(Lz.(zy)))
+    let e2 = Application(Abstraction('x',Application(Variable 'x', Variable 'y')), Abstraction('z', Application(Variable 'z', Variable 'y'))) // ((Lx.(xy))(Lz.(zy)))
     // one beta step should give us ((Lz.(zy))y)
-    printfn "%s" (lambdaprint (betastep e))
+    printfn "%s" (lambdaprint (betastep e2))
+
+    // testing betanorm #1: using e from above ((Lx.(xy))(Lz.(zy)))
+    // beta-normal form is (yy)
+    printfn "%s" (lambdaprint (betanorm e2))
 
     0

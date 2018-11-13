@@ -1,6 +1,8 @@
 module CS334
 
 open LambdaParser
+open AlphaReduction
+open LambdaParser
 
 let rec sub (v:char) (with_e:Expr) (in_e:Expr) : Expr =
     match in_e with
@@ -14,10 +16,10 @@ let rec sub (v:char) (with_e:Expr) (in_e:Expr) : Expr =
 let rec betastep (e:Expr) : Expr =
     match e with
     | Variable v -> e
-    | Abstraction(v,e') -> Abstraction(v, betastep e') // how to beta reduce e'?
+    | Abstraction(v,e') -> Abstraction(v, betastep e')
     | Application(e1,e2) ->
         match e1 with
-        | Variable e1v -> Application(e1, betastep e2) // need to beta reduce e2
+        | Variable e1v -> Application(e1, betastep e2)
         | Abstraction(e1v, e1e) -> sub e1v e2 e1e
         | Application(e1',e2') ->
             // try reducing e1' (left) first
@@ -29,4 +31,13 @@ let rec betastep (e:Expr) : Expr =
                  // both subexpressions not reducible, return original
                  else e
             
-
+let betanorm (e:Expr) : Expr =
+    let expr = fst (alphanorm e (fv e) Map.empty)
+    let rec betanorm' (e':Expr) : Expr =
+        let redexpr = betastep e'
+        // in beta-normal form
+        if e' = redexpr then redexpr
+        // not in beta-normal form, continue beta reducing
+        else betanorm' redexpr
+    betanorm' expr
+    
