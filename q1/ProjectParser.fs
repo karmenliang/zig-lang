@@ -12,3 +12,5 @@ type State = Canvas * Turtle * Pen
 
 type Expr = 
 | Ahead of int
+
+let ahead = pright pws0

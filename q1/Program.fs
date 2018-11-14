@@ -54,8 +54,20 @@ let displaySVG(svgpath: string) : unit =
         printfn "Could not open SVG."
         exit 1
 
+let rec canvasSVGize (c:Canvas) : string =
+    let rec pl c : (string * string * string * string) list =
+       match c with
+       | (x,y,x',y')::ctail -> (x.ToString(),y.ToString(), x'.ToString(),y'.ToString()) :: (pl ctail)
+       | [] -> []
+    let (x1,y1,x2,y2) = (pl c).Head
+    "<line x1='" + x1 + "' x2='" + x2 + "' y1='" + y1 + "' y2='" + y2 + 
+    "stroke-width='1' stroke='black'/>"
+    
+
 [<EntryPoint>]
 let main argv =
+    let aState = State(List.empty,Turtle(100,100,0.0),Pen(1,Black,true))
+    
     let svg = svgDraw (
                 (polyline [(300,200);(300,250);(350,250);(350,200);(300,200)] 1 "green")
               )
