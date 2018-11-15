@@ -61,15 +61,19 @@ let rec canvasSVGize (c:Canvas) : string =
        | [] -> []
     let (x1,y1,x2,y2) = (pl c).Head
     "<line x1='" + x1 + "' x2='" + x2 + "' y1='" + y1 + "' y2='" + y2 + 
-    "stroke-width='1' stroke='black'/>"
+    "' stroke-width='1' stroke='black'/>"
     
 
 [<EntryPoint>]
 let main argv =
     let aState = State(List.empty,Turtle(100,100,0.0),Pen(1,Black,true))
+    let (c,_,_) = aState
+    let aCanvas = c
+    let aLine:Line = (300,200,300,150)
+    let bCanvas = aLine::aCanvas
     
     let svg = svgDraw (
-                (polyline [(300,200);(300,250);(350,250);(350,200);(300,200)] 1 "green")
+                (canvasSVGize bCanvas)
               )
 
     printfn "Writing an SVG to a file and opening with your web browser..."
