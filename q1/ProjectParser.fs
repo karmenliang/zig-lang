@@ -11,6 +11,17 @@ type Canvas = Line list
 type State = Canvas * Turtle * Pen
 
 type Expr = 
-| Ahead of int
+| Ahead of char list
 
-//let ahead = pright pws0
+let expr, exprImpl = recparser()
+
+let ahead = (pright (pstr ("ahead ")) (pmany1 pdigit)) |>> (fun a -> Ahead(a))
+
+exprImpl := ahead
+
+let grammar = pleft expr peof
+
+let parse input : Expr option =
+    match grammar (prepare input) with
+    | Success(e,_) -> Some e
+    | Failure -> None

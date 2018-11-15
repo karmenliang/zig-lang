@@ -63,17 +63,36 @@ let rec canvasSVGize (c:Canvas) : string =
     "<line x1='" + x1 + "' x2='" + x2 + "' y1='" + y1 + "' y2='" + y2 + 
     "' stroke-width='1' stroke='black'/>"
     
+let usage() =
+    printfn "Usage: dotnet run <s>, where s is a lambda expression"
+    exit 1
+
+let argparse argv =
+    if Array.length argv <> 1 then
+        usage()
+    
+    let n =
+        try
+            string argv.[0]
+        with
+        | :? System.FormatException as e ->
+            usage()
+    n
 
 [<EntryPoint>]
 let main argv =
-    let aState = State(List.empty,Turtle(100,100,0.0),Pen(1,Black,true))
-    let (c,_,_) = aState
+    let aState = State(List.empty,Turtle(300,200,0.0),Pen(1,Black,true))
+
+    let input = parse (argparse argv)
+    let x = match input with
+            | Some expr ->  (eval expr aState)
+            | None -> aState
+
+    let (c,_,_) = x
     let aCanvas = c
-    let aLine:Line = (300,200,300,150)
-    let bCanvas = aLine::aCanvas
     
     let svg = svgDraw (
-                (canvasSVGize bCanvas)
+                (canvasSVGize aCanvas)
               )
 
     printfn "Writing an SVG to a file and opening with your web browser..."
