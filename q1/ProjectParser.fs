@@ -11,11 +11,14 @@ type Canvas = Line list
 type State = Canvas * Turtle * Pen
 
 type Expr = 
-| Ahead of char list
+| Ahead of int
 
 let expr, exprImpl = recparser()
 
-let ahead = (pright (pstr ("ahead ")) (pmany1 pdigit)) |>> (fun a -> Ahead(a))
+let pposnumber = pmany1 pdigit |>> stringify |>> int
+let pnumber = pright (pchar '-') (pposnumber)  |>> (fun n -> -n) <|> pposnumber
+
+let ahead = (pright (pstr ("ahead ")) pnumber) |>> (fun a -> Ahead(a))
 
 exprImpl := ahead
 

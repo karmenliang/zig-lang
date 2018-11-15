@@ -81,13 +81,13 @@ let argparse argv =
 
 [<EntryPoint>]
 let main argv =
-    let aState = State(List.empty,Turtle(300,200,0.0),Pen(1,Black,true))
+    let aState = State(List.empty,Turtle(300,200,0.0),Pen(1,Black,true)) // default State
 
     let input = parse (argparse argv)
+
     let x = match input with
             | Some expr ->  (eval expr aState)
             | None -> aState
-
     let (c,_,_) = x
     let aCanvas = c
     
