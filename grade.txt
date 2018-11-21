@@ -1,0 +1,33 @@
+Grade Sheet for CS334F18 HW9
+
+Total: (60 + 10/70 = 70/70
+
+Great work!  This was easy to grade since I actually watched you produce the working version in my office :)
+
+The only issue here is that you forgot to update your spec with a formal grammar.  Given that you've written a parser, creating a grammar in BNF should be easy.  Please be sure to include this in your next submission.
+
+/* INTERPRETER */
+Q1a.   10/10 ProjectParser.fs, ProjectInterpreter.fs, Program.fs present and compiles
+
+Q1b.   10/10 represents some form of data in AST
+
+Q1c.   10/10 represents some form of operation in AST
+
+Q1d.   10/10 parser recognizes subset of possible programs
+
+Q1e.   10/10 evaluator evaluates subset of possible programs
+
+/* SPECIFICATION */
+Q1f.   0/10 spec doc has formal grammar
+
+You forgot to give me a formal grammar?  I.e., in BNF.
+
+Q1g.   10/10 spec doc has informal semantics
+
+/* betanorm */
+Q2.  10/10 bonus
+
+Nice work.
+
+/* proof generator /*
+Q3.  /10 bonus
