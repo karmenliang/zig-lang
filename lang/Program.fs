@@ -1,6 +1,4 @@
-﻿// Learn more about F# at http://fsharp.org
-
-open System
+﻿open System
 open System.Diagnostics
 open System.IO
 open ProjectParser
@@ -19,9 +17,7 @@ let polyline xys width color =
     "/>"
 
 let svgDraw guts =
-    // The triple-double quote thing is called a "heredoc".
-    // It lets us write long string literals that include
-    // newlines, etc.
+    // default canvas size of 600x400px 
     let header = """<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" 
  "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
 
@@ -64,7 +60,7 @@ let rec canvasSVGize (c:Canvas) : string =
     "' stroke-width='1' stroke='black'/>"
     
 let usage() =
-    printfn "Usage: dotnet run \"<s>\", where s is a Turtle expression"
+    printfn "Usage: dotnet run \"<s>\", where <s> is a Turtle expression"
     exit 1
 
 let argparse argv =
