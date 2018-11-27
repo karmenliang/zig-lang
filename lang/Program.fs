@@ -64,7 +64,7 @@ let rec canvasSVGize (c:Canvas) : string =
     "' stroke-width='1' stroke='black'/>"
     
 let usage() =
-    printfn "Usage: dotnet run <s>, where s is a lambda expression"
+    printfn "Usage: dotnet run \"<s>\", where s is a Turtle expression"
     exit 1
 
 let argparse argv =
