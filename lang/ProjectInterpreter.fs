@@ -7,7 +7,7 @@ let yget s =
     let (x,y,a) = t
     y
 
-let newState s y' =
+let ychange s y' =
     let (c,t,p) = s
     let (x,y,a) = t
     let t' = Turtle(x,y',a)
@@ -24,7 +24,20 @@ let rec eval e s: State =
         // let t' = Turtle(x,y',a) //functionalize this
         // let c' = Line(x,y,x,y')::c
         // (c',t',p)
-        newState s y'
+        ychange s y'
     | Behind dist ->
         let y' = (yget s)+dist
-        newState s y'
+        ychange s y'
+    // | Seq(e1,e2) ->
+    //     let s1 = eval e1 s
+    //     let s2 = eval e2 s1
+    //     s2
+    // have not tested pendown or penup
+    | Pendown ->
+        let (c,t,p) = s
+        let (w,color,_) = p
+        (c,t,Pen(w,color,true))
+    | Penup ->
+        let (c,t,p) = s
+        let (w,color,_) = p
+        (c,t,Pen(w,color,false))
