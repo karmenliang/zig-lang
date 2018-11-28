@@ -80,7 +80,6 @@ let main argv =
     let aState = State(List.empty,Turtle(300,200,1.0471975512),Pen(1,Black,true)) // default State
 
     let input = parse (argparse argv)
-
     let x = match input with
             | Some expr ->  (eval expr aState)
             | None -> aState
