@@ -13,30 +13,34 @@ type Canvas = Line list
 type State = Canvas * Turtle * Pen
 
 type Expr =
-| Seq of Expr*Expr
 | Ahead of int
 | Behind of int
 | Clockwise of int
 | Pendown
 | Penup
+| Seq of Expr*Expr
 
 let expr, exprImpl = recparser()
 
-let pposnumber = pmany1 pdigit |>> stringify |>> int
-let pnumber = pright (pchar '-') (pposnumber)  |>> (fun n -> -n) <|> pposnumber
+let pposnumber = pmany1 pdigit |>> stringify |>> int <!> "pposnumber"
+let pnumber = pright (pchar '-') (pposnumber)  |>> (fun n -> -n) <|> pposnumber <!> "pnumber"
 
-let seq = pseq (pleft expr pws1) expr (fun (e1,e2) -> Seq(e1,e2))
 // pseq expr expr (fun (e1,e2) -> Seq(e1,e2))
 
 
-let ahead = pright (pstr ("ahead ")) pnumber |>> (fun a -> Ahead(a))
-let behind = pright (pstr ("behind ")) pnumber |>> (fun a -> Behind(a))
-let clockwise = pright (pstr ("clockwise ")) pnumber |>> (fun a -> Clockwise(a))
-let pendown = pstr "pendown" |>> fun a -> Pendown
-let penup = pstr "penup" |>> fun a -> Penup
+let ahead = pright (pstr ("ahead ")) pnumber |>> (fun a -> Ahead(a)) <!> "ahead"
+let behind = pright (pstr ("behind ")) pnumber |>> (fun a -> Behind(a)) <!> "behind"
+let clockwise = pright (pstr ("clockwise ")) pnumber |>> (fun a -> Clockwise(a)) <!> "clockwise"
+let pendown = (pstr "pendown" |>> fun a -> Pendown) <!> "pendown"
+let penup = (pstr "penup" |>> fun a -> Penup) <!> "penup"
 
-exprImpl := seq <|> ahead <|> behind <|> clockwise <|> pendown <|> penup
-let grammar = pleft expr peof
+let nonrecexpr =  ahead <|> behind <|> clockwise <|> pendown <|> penup <!> "nonrecexpr"
+
+let seq = pseq (pleft nonrecexpr (pstr "; ")) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
+
+
+exprImpl := seq <|> nonrecexpr <!> "expr"
+let grammar = pleft expr peof <!> "grammar"
 
 let parse input : Expr option =
     match grammar (prepare input) with

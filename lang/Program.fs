@@ -3,6 +3,7 @@ open System.Diagnostics
 open System.IO
 open ProjectParser
 open ProjectInterpreter
+open System.ComponentModel
 
 let polyline xys width color =
     let rec pl xys : string list =
@@ -30,6 +31,7 @@ let svgDraw guts =
 
 let initGraphicsProcess(svgpath: string): Process =
     // "open" only works on the Mac
+    // look to see if OS is Mac or Windows; Windows is "explorer.exe" Mac is "open"
     let info = new ProcessStartInfo (
                  FileName = "/bin/bash",
                  Arguments = "-c \"open " + svgpath + "\"",
@@ -80,6 +82,11 @@ let main argv =
     let aState = State(List.empty,Turtle(300,200,1.0471975512),Pen(1,Black,true)) // default State
 
     let input = parse (argparse argv)
+
+    match input with
+    | Some expr -> printfn "%s" (prettyprint expr)
+    | None -> printfn "nope"
+
     let x = match input with
             | Some expr ->  (eval expr aState)
             | None -> aState

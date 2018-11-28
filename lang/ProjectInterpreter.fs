@@ -54,16 +54,13 @@ let rec prettyprint e : string =
     | Seq(e1,e2) -> prettyprint e1 + ";\n " + prettyprint e2
     | Ahead dist -> "ahead( " + dist.ToString() + ")"
     | Behind dist -> "behind( " + dist.ToString() + ")"
-    | Clockwise degrees -> "clockwise " + degrees.ToString()
+    | Clockwise degrees -> "clockwise( " + degrees.ToString() + ")"
     | Pendown -> "pendown"
     | Penup -> "penup"
 
 // default assumptions: pen is down and angle is 1.0471975512
 let rec eval e s: State =
     match e with
-    | Seq(e1,e2) ->
-        let s1 = eval e1 s
-        eval e2 s1
     | Ahead dist ->
         let x' = (xget s)-(xcomp s dist)
         let y' = (yget s)-(ycomp s dist)
@@ -86,3 +83,6 @@ let rec eval e s: State =
         let (c,t,p) = s
         let (w,color,_) = p
         (c,t,Pen(w,color,false))
+    | Seq(e1,e2) ->
+        let s1 = eval e1 s
+        eval e2 s1
