@@ -12,7 +12,8 @@ type Line = int * int * int * int
 type Canvas = Line list
 type State = Canvas * Turtle * Pen
 
-type Expr = 
+type Expr =
+| Seq of Expr*Expr
 | Ahead of int
 | Behind of int
 | Clockwise of int
@@ -23,14 +24,15 @@ let expr, exprImpl = recparser()
 
 let pposnumber = pmany1 pdigit |>> stringify |>> int
 let pnumber = pright (pchar '-') (pposnumber)  |>> (fun n -> -n) <|> pposnumber
+
+let seq = pseq expr expr (fun (e1,e2) -> Seq(e1,e2))
 let ahead = pright (pstr ("ahead ")) pnumber |>> (fun a -> Ahead(a))
 let behind = pright (pstr ("behind ")) pnumber |>> (fun a -> Behind(a))
 let clockwise = pright (pstr ("clockwise ")) pnumber |>> (fun a -> Clockwise(a))
 let pendown = pstr "pendown" |>> fun a -> Pendown
 let penup = pstr "penup" |>> fun a -> Penup
 
-exprImpl := ahead <|> behind <|> clockwise <|>pendown <|> penup
-
+exprImpl := ahead <|> behind <|> clockwise <|> pendown <|> penup
 let grammar = pleft expr peof
 
 let parse input : Expr option =
