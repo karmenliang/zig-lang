@@ -32,7 +32,7 @@ let clockwise = pright (pstr ("clockwise ")) pnumber |>> (fun a -> Clockwise(a))
 let pendown = pstr "pendown" |>> fun a -> Pendown
 let penup = pstr "penup" |>> fun a -> Penup
 
-exprImpl := ahead <|> behind <|> clockwise <|> pendown <|> penup
+exprImpl := seq <|> ahead <|> behind <|> clockwise <|> pendown <|> penup
 let grammar = pleft expr peof
 
 let parse input : Expr option =
