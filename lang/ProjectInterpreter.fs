@@ -6,7 +6,7 @@ open System
 let PI = 3.14159265358979
 let round (x:float) = int(Math.Round(x))
 
-let to_radians degrees =
+let toradians degrees =
     degrees * PI / 180.0
 
 let aget s =
@@ -71,7 +71,7 @@ let rec eval e s: State =
         xychange s x' y'
     // have not tested clockwise
     | Clockwise degrees ->
-        let radians = to_radians (float degrees)
+        let radians = toradians (float degrees)
         let a' = (aget s) + radians
         achange s a'
     // have not tested pendown or penup

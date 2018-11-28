@@ -6,6 +6,7 @@ open ProjectInterpreter
 open System.ComponentModel
 
 let polyline xys width color =
+    printfn "%A" xys
     let rec pl xys : string list =
        match xys with
        | (x,y)::xys' -> x.ToString() + " " + y.ToString() :: (pl xys')
@@ -32,9 +33,14 @@ let svgDraw guts =
 let initGraphicsProcess(svgpath: string): Process =
     // "open" only works on the Mac
     // look to see if OS is Mac or Windows; Windows is "explorer.exe" Mac is "open"
+    // still doesn't work
+    let os = match int Environment.OSVersion.Platform with
+             | 4 | 128 -> "open " // Linux
+             | 6 -> "open " // OSX
+             | _ -> "explorer.exe " // Windows
     let info = new ProcessStartInfo (
                  FileName = "/bin/bash",
-                 Arguments = "-c \"open " + svgpath + "\"",
+                 Arguments = "-c \"" + os + svgpath + "\"",
                  RedirectStandardOutput = true,
                  UseShellExecute = false,
                  CreateNoWindow = true
@@ -52,15 +58,16 @@ let displaySVG(svgpath: string) : unit =
         printfn "Could not open SVG."
         exit 1
 
-let rec canvasSVGize (c:Canvas) : string =
+let canvasSVGize (c:Canvas) : string =
     let rec pl c : (string * string * string * string) list =
        match c with
        | (x,y,x',y')::ctail -> (x.ToString(),y.ToString(), x'.ToString(),y'.ToString()) :: (pl ctail)
        | [] -> []
-    let (x1,y1,x2,y2) = (pl c).Head
-    "<line x1='" + x1 + "' x2='" + x2 + "' y1='" + y1 + "' y2='" + y2 + 
-    "' stroke-width='1' stroke='black'/>"
-    
+    let rec svglist list : string =
+        match list with
+        | (x1,y1,x2,y2)::tail -> "<line x1='" + x1 + "' x2='" + x2 + "' y1='" + y1 + "' y2='" + y2 + "' stroke-width='1' stroke='black'/>" + (tosvglist tail)
+        | [] -> ""
+    svglist (pl c)  
 let usage() =
     printfn "Usage: dotnet run \"<s>\", where <s> is a Turtle expression"
     exit 1
@@ -83,6 +90,7 @@ let main argv =
 
     let input = parse (argparse argv)
 
+    // debugging
     match input with
     | Some expr -> printfn "%s" (prettyprint expr)
     | None -> printfn "nope"

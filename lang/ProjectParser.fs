@@ -25,9 +25,6 @@ let expr, exprImpl = recparser()
 let pposnumber = pmany1 pdigit |>> stringify |>> int <!> "pposnumber"
 let pnumber = pright (pchar '-') (pposnumber)  |>> (fun n -> -n) <|> pposnumber <!> "pnumber"
 
-// pseq expr expr (fun (e1,e2) -> Seq(e1,e2))
-
-
 let ahead = pright (pstr ("ahead ")) pnumber |>> (fun a -> Ahead(a)) <!> "ahead"
 let behind = pright (pstr ("behind ")) pnumber |>> (fun a -> Behind(a)) <!> "behind"
 let clockwise = pright (pstr ("clockwise ")) pnumber |>> (fun a -> Clockwise(a)) <!> "clockwise"
