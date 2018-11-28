@@ -77,7 +77,7 @@ let argparse argv =
 
 [<EntryPoint>]
 let main argv =
-    let aState = State(List.empty,Turtle(300,200,0.0),Pen(1,Black,true)) // default State
+    let aState = State(List.empty,Turtle(300,200,1.0471975512),Pen(1,Black,true)) // default State
 
     let input = parse (argparse argv)
 

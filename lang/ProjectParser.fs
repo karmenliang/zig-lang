@@ -15,6 +15,7 @@ type State = Canvas * Turtle * Pen
 type Expr = 
 | Ahead of int
 | Behind of int
+| Clockwise of int
 | Pendown
 | Penup
 
@@ -24,10 +25,11 @@ let pposnumber = pmany1 pdigit |>> stringify |>> int
 let pnumber = pright (pchar '-') (pposnumber)  |>> (fun n -> -n) <|> pposnumber
 let ahead = pright (pstr ("ahead ")) pnumber |>> (fun a -> Ahead(a))
 let behind = pright (pstr ("behind ")) pnumber |>> (fun a -> Behind(a))
+let clockwise = pright (pstr ("clockwise ")) pnumber |>> (fun a -> Clockwise(a))
 let pendown = pstr "pendown" |>> fun a -> Pendown
 let penup = pstr "penup" |>> fun a -> Penup
 
-exprImpl := ahead <|> behind <|> pendown <|> penup
+exprImpl := ahead <|> behind <|> clockwise <|>pendown <|> penup
 
 let grammar = pleft expr peof
 
