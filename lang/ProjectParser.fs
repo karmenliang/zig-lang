@@ -6,7 +6,7 @@ type Color =
 | Black
 // x, y, angle
 type Turtle = int * int * float
-// width, color, pendown
+// width, color, press
 type Pen = int * Color * bool
 type Line = int * int * int * int
 type Canvas = Line list
@@ -16,8 +16,8 @@ type Expr =
 | Ahead of int
 | Behind of int
 | Clockwise of int
-| Pendown
-| Penup
+| Press
+| Lift
 | Seq of Expr*Expr
 
 let expr, exprImpl = recparser()
@@ -28,10 +28,10 @@ let pnumber = pright (pchar '-') (pposnumber)  |>> (fun n -> -n) <|> pposnumber 
 let ahead = pright (pstr ("ahead ")) pnumber |>> (fun a -> Ahead(a)) <!> "ahead"
 let behind = pright (pstr ("behind ")) pnumber |>> (fun a -> Behind(a)) <!> "behind"
 let clockwise = pright (pstr ("clockwise ")) pnumber |>> (fun a -> Clockwise(a)) <!> "clockwise"
-let pendown = (pstr "pendown" |>> fun a -> Pendown) <!> "pendown"
-let penup = (pstr "penup" |>> fun a -> Penup) <!> "penup"
+let press = (pstr "press" |>> fun a -> Press) <!> "press"
+let lift = (pstr "lift" |>> fun a -> Lift) <!> "lift"
 
-let nonrecexpr =  ahead <|> behind <|> clockwise <|> pendown <|> penup <!> "nonrecexpr"
+let nonrecexpr =  ahead <|> behind <|> clockwise <|> press <|> lift <!> "nonrecexpr"
 
 let seq = pseq (pleft nonrecexpr (pstr "; ")) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 

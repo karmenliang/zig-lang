@@ -40,8 +40,11 @@ let xychange s x' y' =
     let (c,t,p) = s
     let (x,y,a) = t
     let t' = Turtle(x',y',a)
-    let c' = Line(x,y,x',y')::c
-    (c',t',p)
+    let (_,_,down) = p
+    if down then
+        let c' = Line(x,y,x',y')::c
+        (c',t',p)
+    else (c,t',p)
 
 let achange s a' =
     let (c,t,p) = s
@@ -51,12 +54,12 @@ let achange s a' =
 
 let rec prettyprint e : string =
     match e with
-    | Seq(e1,e2) -> prettyprint e1 + ";\n " + prettyprint e2
-    | Ahead dist -> "ahead( " + dist.ToString() + ")"
-    | Behind dist -> "behind( " + dist.ToString() + ")"
-    | Clockwise degrees -> "clockwise( " + degrees.ToString() + ")"
-    | Pendown -> "pendown"
-    | Penup -> "penup"
+    | Seq(e1,e2) -> prettyprint e1 + ";\n" + prettyprint e2
+    | Ahead dist -> "ahead(" + dist.ToString() + ")"
+    | Behind dist -> "behind(" + dist.ToString() + ")"
+    | Clockwise degrees -> "clockwise(" + degrees.ToString() + ")"
+    | Press -> "press"
+    | Lift -> "lift"
 
 // default assumptions: pen is down and angle is 1.0471975512
 let rec eval e s: State =
@@ -69,17 +72,15 @@ let rec eval e s: State =
         let x' = (xget s)+(xcomp s dist)
         let y' = (yget s)+(ycomp s dist)
         xychange s x' y'
-    // have not tested clockwise
     | Clockwise degrees ->
         let radians = toradians (float degrees)
         let a' = (aget s) + radians
         achange s a'
-    // have not tested pendown or penup
-    | Pendown ->
+    | Press ->
         let (c,t,p) = s
         let (w,color,_) = p
         (c,t,Pen(w,color,true))
-    | Penup ->
+    | Lift ->
         let (c,t,p) = s
         let (w,color,_) = p
         (c,t,Pen(w,color,false))
