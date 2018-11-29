@@ -40,9 +40,9 @@ let xychange s x' y' =
     let (c,t,p) = s
     let (x,y,a) = t
     let t' = Turtle(x',y',a)
-    let (_,_,down) = p
+    let (_,col,down) = p
     if down then
-        let c' = Line(x,y,x',y')::c
+        let c' = Line(x,y,x',y',col)::c
         (c',t',p)
     else (c,t',p)
 
@@ -52,6 +52,7 @@ let achange s a' =
     let t' = Turtle(x,y,a')
     (c,t',p)
 
+// for debugging
 let rec prettyprint e : string =
     match e with
     | Seq(e1,e2) -> prettyprint e1 + ";\n" + prettyprint e2
@@ -60,6 +61,7 @@ let rec prettyprint e : string =
     | Clockwise degrees -> "clockwise(" + degrees.ToString() + ")"
     | Press -> "press"
     | Lift -> "lift"
+    | Pencolor(str) -> "pencolor " + (str)
 
 // default assumptions: pen is down and angle is 1.0471975512
 let rec eval e s: State =
@@ -87,3 +89,7 @@ let rec eval e s: State =
     | Seq(e1,e2) ->
         let s1 = eval e1 s
         eval e2 s1
+    | Pencolor(str) ->
+        let (c,t,p) = s
+        let (w,_,d) = p
+        (c,t,Pen(w,str,d))

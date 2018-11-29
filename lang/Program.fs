@@ -59,13 +59,13 @@ let displaySVG(svgpath: string) : unit =
         exit 1
 
 let canvasSVGize (c:Canvas) : string =
-    let rec pl c : (string * string * string * string) list =
+    let rec pl c : (string * string * string * string * string) list =
        match c with
-       | (x,y,x',y')::ctail -> (x.ToString(),y.ToString(), x'.ToString(),y'.ToString()) :: (pl ctail)
+       | (x,y,x',y',col)::ctail -> (x.ToString(),y.ToString(), x'.ToString(),y'.ToString(),col) :: (pl ctail)
        | [] -> []
     let rec svglist list : string =
         match list with
-        | (x1,y1,x2,y2)::tail -> "<line x1='" + x1 + "' x2='" + x2 + "' y1='" + y1 + "' y2='" + y2 + "' stroke-width='1' stroke='black'/>" + (svglist tail)
+        | (x1,y1,x2,y2,col)::tail -> "<line x1='" + x1 + "' x2='" + x2 + "' y1='" + y1 + "' y2='" + y2 + "' stroke-width='1' stroke='"+ col + "'/>" + (svglist tail)
         | [] -> ""
     svglist (pl c)  
 let usage() =
@@ -86,7 +86,7 @@ let argparse argv =
 
 [<EntryPoint>]
 let main argv =
-    let aState = State(List.empty,Turtle(300,200,1.0471975512),Pen(1,Black,true)) // default State
+    let aState = State(List.empty,Turtle(300,200,(PI/2.0)),Pen(1,"black",true)) // default State
 
     let input = parse (argparse argv)
 
