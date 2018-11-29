@@ -2,9 +2,6 @@ module ProjectParser
 
 open Parser
 
-type Color =
-| Black
-| Red
 // x, y, angle
 type Turtle = int * int * float
 // width, color, press
