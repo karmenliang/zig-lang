@@ -62,8 +62,9 @@ let rec prettyprint e : string =
     | Press -> "press"
     | Lift -> "lift"
     | Pencolor(str) -> "pencolor " + (str)
+    | Loop(i,e) -> "loop (" + i.ToString() + ")" + prettyprint e
 
-// default assumptions: pen is down and angle is 1.0471975512
+// default assumptions: pen is down and angle is PI/2
 let rec eval e s: State =
     match e with
     | Ahead dist ->
@@ -93,3 +94,8 @@ let rec eval e s: State =
         let (c,t,p) = s
         let (w,_,d) = p
         (c,t,Pen(w,str,d))
+    | Loop(i,e) ->
+        if (i > 0) then 
+            let s1 = eval e s
+            eval (Loop(i-1,e)) s1
+        else s

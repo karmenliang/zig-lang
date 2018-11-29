@@ -21,21 +21,25 @@ type Expr =
 | Lift
 | Seq of Expr*Expr
 | Pencolor of string
+| Loop of int*Expr
 
 let expr, exprImpl = recparser()
 
 let pposnumber = pmany1 pdigit |>> stringify |>> int <!> "pposnumber"
 let pnumber = pright (pchar '-') (pposnumber)  |>> (fun n -> -n) <|> pposnumber <!> "pnumber"
 let pstring = pmany1 pletter |>> stringify <!> "pstring"
-let pencolor = pright (pstr ("pencolor ")) pstring |>> (fun a -> Pencolor(a)) <!> "pencolor"
+let pnuminparens = pbetween (pchar '(') (pchar ')') pnumber <!> "pnuminparens"
+let pbrackets = pbetween (pchar '{') (pchar '}') expr <!> "pbrackets"
 
 let ahead = pright (pstr ("ahead ")) pnumber |>> (fun a -> Ahead(a)) <!> "ahead"
 let behind = pright (pstr ("behind ")) pnumber |>> (fun a -> Behind(a)) <!> "behind"
 let clockwise = pright (pstr ("clockwise ")) pnumber |>> (fun a -> Clockwise(a)) <!> "clockwise"
 let press = (pstr "press" |>> fun a -> Press) <!> "press"
 let lift = (pstr "lift" |>> fun a -> Lift) <!> "lift"
+let pencolor = pright (pstr ("pencolor ")) pstring |>> (fun a -> Pencolor(a)) <!> "pencolor"
+let loop = pright (pstr ("loop ")) (pseq pnuminparens pbrackets (fun(i,e) -> Loop(i,e))) <!> "loop"
 
-let nonrecexpr =  ahead <|> behind <|> clockwise <|> press <|> lift <|> pencolor <!> "nonrecexpr"
+let nonrecexpr =  ahead <|> behind <|> clockwise <|> press <|> lift <|> pencolor <|> loop <!> "nonrecexpr"
 
 let seq = pseq (pleft nonrecexpr (pstr "; ")) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 
