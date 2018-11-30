@@ -5,19 +5,6 @@ open ProjectParser
 open ProjectInterpreter
 open System.ComponentModel
 
-let polyline xys width color =
-    printfn "%A" xys
-    let rec pl xys : string list =
-       match xys with
-       | (x,y)::xys' -> x.ToString() + " " + y.ToString() :: (pl xys')
-       | [] -> []
-    "<polyline points='" +
-    String.Join(",", List.rev (pl xys)) + "' " +
-    "stroke-width='" + width.ToString() + "' " +
-    "stroke='" + color + "' " +
-    "style='fill: none;' " +
-    "/>"
-
 let svgDraw guts =
     // default canvas size of 600x400px 
     let header = """<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" 
@@ -59,13 +46,13 @@ let displaySVG(svgpath: string) : unit =
         exit 1
 
 let canvasSVGize (c:Canvas) : string =
-    let rec pl c : (string * string * string * string * string) list =
+    let rec pl c : (string*string*string*string*string*string) list =
        match c with
-       | (x,y,x',y',col)::ctail -> (x.ToString(),y.ToString(), x'.ToString(),y'.ToString(),col) :: (pl ctail)
+       | (x1,y1,x2,y2,wid,col)::ctail -> (x1.ToString(),y1.ToString(),x2.ToString(),y2.ToString(),wid.ToString(),col) :: (pl ctail)
        | [] -> []
     let rec svglist list : string =
         match list with
-        | (x1,y1,x2,y2,col)::tail -> "<line x1='" + x1 + "' x2='" + x2 + "' y1='" + y1 + "' y2='" + y2 + "' stroke-width='1' stroke='"+ col + "'/>" + (svglist tail)
+        | (x1,y1,x2,y2,wid,col)::tail -> "<line x1='" + x1 + "' x2='" + x2 + "' y1='" + y1 + "' y2='" + y2 + "' stroke-width='" + wid + "' stroke='" + col + "'/>" + (svglist tail)
         | [] -> ""
     svglist (pl c)  
 let usage() =
@@ -88,6 +75,7 @@ let argparse argv =
 let main argv =
     let aState = State(List.empty,Turtle(300,200,(PI/2.0)),Pen(1,"black",true)) // default State
 
+    // reading in .zig files
     if argv.[0].Contains ".zig" then 
         let readLines = File.ReadAllLines(argv.[0]) |> String.concat("")
         let altInput = parse readLines
@@ -103,17 +91,16 @@ let main argv =
         let svg = svgDraw (
                     (canvasSVGize aCanvas)
                   )
-
-        printfn "Writing an SVG to a fil3 and opening with your web browser..."
+        printfn "Writing an SVG to a file and opening with your web browser..."
         File.WriteAllText("output.svg", svg)
         displaySVG "output.svg"
-        Threading.Thread.Sleep(5000)  // wait for the web browser to start up
-        //File.Delete "output.svg" // cleanup
+        Threading.Thread.Sleep(5000)
         0
+    // reading in user input from command line
     else 
     let input = parse (argparse argv)
 
-    // debugging
+    // for debugging
     match input with
     | Some expr -> printfn "%s" (prettyprint expr)
     | None -> printfn "nope"

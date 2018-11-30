@@ -6,7 +6,8 @@ open Parser
 type Turtle = int * int * float
 // width, color, press
 type Pen = int * string * bool
-type Line = int * int * int * int * string
+// x1, y1, x2, y2, width, color name
+type Line = int * int * int * int * int * string
 type Canvas = Line list
 type State = Canvas * Turtle * Pen
 
@@ -19,6 +20,7 @@ type Expr =
 | Lift
 | Seq of Expr*Expr
 | Pencolor of string
+| Penwidth of int
 | Loop of int*Expr
 
 let expr, exprImpl = recparser()
@@ -41,8 +43,10 @@ let press = (pstr "press" |>> fun a -> Press) <!> "press"
 let lift = (pstr "lift" |>> fun a -> Lift) <!> "lift"
 let pencolor = pright (pstr ("pencolor ")) pstring |>> (fun a -> Pencolor(a)) <!> "pencolor"
 let pc = pright (pstr ("pc ")) pstring |>> (fun a -> Pencolor(a)) <!> "pc"
+let penwidth = pright (pstr ("penwidth ")) pposnumber |>> (fun a -> Penwidth(a)) <!> "penwidth"
+let pw = pright (pstr ("pw ")) pposnumber |>> (fun a -> Penwidth(a)) <!> "pw"
 let loop = pright (pstr ("loop ")) (pseq pnuminparens pbrackets (fun(i,e) -> Loop(i,e))) <!> "loop"
-let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> loop <!> "nonrecexpr"
+let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penwidth <|> pw <|> loop <!> "nonrecexpr"
 
 let seq = pseq (pleft nonrecexpr (pstr "; ")) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 

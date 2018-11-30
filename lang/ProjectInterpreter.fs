@@ -40,9 +40,9 @@ let xychange s x' y' =
     let (c,t,p) = s
     let (x,y,a) = t
     let t' = Turtle(x',y',a)
-    let (_,col,down) = p
+    let (wid,col,down) = p
     if down then
-        let c' = Line(x,y,x',y',col)::c
+        let c' = Line(x,y,x',y',wid,col)::c
         (c',t',p)
     else (c,t',p)
 
@@ -63,6 +63,7 @@ let rec prettyprint e : string =
     | Press -> "press"
     | Lift -> "lift"
     | Pencolor(str) -> "pencolor " + (str)
+    | Penwidth(i) -> "penwidth " + i.ToString()
     | Loop(i,e) -> "loop (" + i.ToString() + ")" + prettyprint e
 
 // default assumptions: pen is down and angle is PI/2
@@ -95,10 +96,14 @@ let rec eval e s: State =
     | Seq(e1,e2) ->
         let s1 = eval e1 s
         eval e2 s1
-    | Pencolor(str) ->
+    | Pencolor(color) ->
         let (c,t,p) = s
         let (w,_,d) = p
-        (c,t,Pen(w,str,d))
+        (c,t,Pen(w,color,d))
+    | Penwidth(i) ->
+        let (c,t,p) = s
+        let (_,color,d) = p
+        (c,t,Pen(i,color,d))
     | Loop(i,e) ->
         if (i > 0) then 
             let s1 = eval e s
