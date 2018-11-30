@@ -14,6 +14,7 @@ type Expr =
 | Ahead of int
 | Behind of int
 | Clockwise of int
+| Counterwise of int
 | Press
 | Lift
 | Seq of Expr*Expr
@@ -29,14 +30,19 @@ let pnuminparens = pbetween (pchar '(') (pchar ')') pnumber <!> "pnuminparens"
 let pbrackets = pbetween (pchar '{') (pchar '}') expr <!> "pbrackets"
 
 let ahead = pright (pstr ("ahead ")) pnumber |>> (fun a -> Ahead(a)) <!> "ahead"
+let a = pright (pstr ("a ")) pnumber |>> (fun a -> Ahead(a)) <!> "a"
 let behind = pright (pstr ("behind ")) pnumber |>> (fun a -> Behind(a)) <!> "behind"
+let b = pright (pstr ("b ")) pnumber |>> (fun a -> Behind(a)) <!> "b"
 let clockwise = pright (pstr ("clockwise ")) pnumber |>> (fun a -> Clockwise(a)) <!> "clockwise"
+let cw = pright (pstr ("cw ")) pnumber |>> (fun a -> Clockwise(a)) <!> "cw"
+let counterwise = pright (pstr ("counterwise ")) pnumber |>> (fun a -> Counterwise(a)) <!> "counterwise"
+let ccw = pright (pstr ("ccw ")) pnumber |>> (fun a -> Counterwise(a)) <!> "ccw"
 let press = (pstr "press" |>> fun a -> Press) <!> "press"
 let lift = (pstr "lift" |>> fun a -> Lift) <!> "lift"
 let pencolor = pright (pstr ("pencolor ")) pstring |>> (fun a -> Pencolor(a)) <!> "pencolor"
+let pc = pright (pstr ("pc ")) pstring |>> (fun a -> Pencolor(a)) <!> "pc"
 let loop = pright (pstr ("loop ")) (pseq pnuminparens pbrackets (fun(i,e) -> Loop(i,e))) <!> "loop"
-
-let nonrecexpr =  ahead <|> behind <|> clockwise <|> press <|> lift <|> pencolor <|> loop <!> "nonrecexpr"
+let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> loop <!> "nonrecexpr"
 
 let seq = pseq (pleft nonrecexpr (pstr "; ")) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 

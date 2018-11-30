@@ -59,6 +59,7 @@ let rec prettyprint e : string =
     | Ahead dist -> "ahead(" + dist.ToString() + ")"
     | Behind dist -> "behind(" + dist.ToString() + ")"
     | Clockwise degrees -> "clockwise(" + degrees.ToString() + ")"
+    | Counterwise degrees -> "counterwise(" + degrees.ToString() + ")"
     | Press -> "press"
     | Lift -> "lift"
     | Pencolor(str) -> "pencolor " + (str)
@@ -78,6 +79,10 @@ let rec eval e s: State =
     | Clockwise degrees ->
         let radians = toradians (float degrees)
         let a' = (aget s) + radians
+        achange s a'
+    | Counterwise degrees ->
+        let radians = toradians (float degrees)
+        let a' = (aget s) - radians
         achange s a'
     | Press ->
         let (c,t,p) = s
