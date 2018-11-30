@@ -88,6 +88,29 @@ let argparse argv =
 let main argv =
     let aState = State(List.empty,Turtle(300,200,(PI/2.0)),Pen(1,"black",true)) // default State
 
+    if argv.[0].Contains ".zig" then 
+        let readLines = File.ReadAllLines(argv.[0]) |> String.concat("")
+        let altInput = parse readLines
+        match altInput with
+        | Some expr -> printfn "%s" (prettyprint expr)
+        | None -> printfn "nope"
+        let x = match altInput with
+            | Some expr ->  (eval expr aState)
+            | None -> aState
+        let (c,_,_) = x
+        let aCanvas = c
+        
+        let svg = svgDraw (
+                    (canvasSVGize aCanvas)
+                  )
+
+        printfn "Writing an SVG to a fil3 and opening with your web browser..."
+        File.WriteAllText("output.svg", svg)
+        displaySVG "output.svg"
+        Threading.Thread.Sleep(5000)  // wait for the web browser to start up
+        //File.Delete "output.svg" // cleanup
+        0
+    else 
     let input = parse (argparse argv)
 
     // debugging
