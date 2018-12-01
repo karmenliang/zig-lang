@@ -12,7 +12,7 @@ let svgDraw guts =
 
 <svg xmlns="http://www.w3.org/2000/svg" 
  xmlns:xlink="http://www.w3.org/1999/xlink" 
- width='600px' height='400px'>"""
+ width='600px' height='400px' style="background-color: white;">""" // how to change background color?
 
     let footer = """</svg>"""
     header + guts + footer
@@ -54,7 +54,17 @@ let canvasSVGize (c:Canvas) : string =
         match list with
         | (x1,y1,x2,y2,wid,col)::tail -> "<line x1='" + x1 + "' x2='" + x2 + "' y1='" + y1 + "' y2='" + y2 + "' stroke-width='" + wid + "' stroke='" + col + "'/>" + (svglist tail)
         | [] -> ""
-    svglist (pl c)  
+    svglist (pl c)
+
+let createSVG c =
+    let svg = svgDraw (canvasSVGize c)
+    printfn "Writing an SVG to a file and opening with your web browser..."
+    File.WriteAllText("output.svg", svg)
+    displaySVG "output.svg"
+    Threading.Thread.Sleep(5000) // wait for the web browser to start up
+    //File.Delete "output.svg" // cleanup
+    0
+
 let usage() =
     printfn "Usage: dotnet run \"<s>\", where <s> is a Turtle expression"
     exit 1
@@ -73,7 +83,8 @@ let argparse argv =
 
 [<EntryPoint>]
 let main argv =
-    let aState = State(List.empty,Turtle(300,200,(PI/2.0)),Pen(1,"black",true)) // default State
+    // default State
+    let aState = State(List.empty,Turtle(300,200,(PI/2.0)),Pen(1,"black",true))
 
     // reading in .zig files
     if argv.[0].Contains ".zig" then 
@@ -86,16 +97,7 @@ let main argv =
             | Some expr ->  (eval expr aState)
             | None -> aState
         let (c,_,_) = x
-        let aCanvas = c
-        
-        let svg = svgDraw (
-                    (canvasSVGize aCanvas)
-                  )
-        printfn "Writing an SVG to a file and opening with your web browser..."
-        File.WriteAllText("output.svg", svg)
-        displaySVG "output.svg"
-        Threading.Thread.Sleep(5000)
-        0
+        createSVG c
     // reading in user input from command line
     else 
     let input = parse (argparse argv)
@@ -109,15 +111,4 @@ let main argv =
             | Some expr ->  (eval expr aState)
             | None -> aState
     let (c,_,_) = x
-    let aCanvas = c
-    
-    let svg = svgDraw (
-                (canvasSVGize aCanvas)
-              )
-
-    printfn "Writing an SVG to a file and opening with your web browser..."
-    File.WriteAllText("output.svg", svg)
-    displaySVG "output.svg"
-    Threading.Thread.Sleep(5000)  // wait for the web browser to start up
-    //File.Delete "output.svg" // cleanup
-    0
+    createSVG c
