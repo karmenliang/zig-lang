@@ -2,15 +2,6 @@ module ProjectParser
 
 open Parser
 
-// x, y, angle
-type Turtle = int * int * float
-// width, color, press
-type Pen = int * string * bool
-// x1, y1, x2, y2, width, color name
-type Line = int * int * int * int * int * string
-type Canvas = Line list
-type State = Canvas * Turtle * Pen
-
 type Expr =
 | Ahead of int
 | Behind of int
@@ -22,9 +13,22 @@ type Expr =
 | Pencolor of string
 | Penwidth of int
 | Loop of int*Expr
+| Assign of string*int
+
+type Context = Map<string,int>
+
+// x, y, angle
+type Turtle = int * int * float
+// width, color, press
+type Pen = int * string * bool
+// x1, y1, x2, y2, width, color name
+type Line = int * int * int * int * int * string
+type Canvas = Line list
+type State = Canvas * Turtle * Pen * Context
 
 let expr, exprImpl = recparser()
 
+// helper parsers
 let pposnumber = pmany1 pdigit |>> stringify |>> int <!> "pposnumber"
 let pnumber = pright (pchar '-') (pposnumber)  |>> (fun n -> -n) <|> pposnumber <!> "pnumber"
 let pstring = pmany1 pletter |>> stringify <!> "pstring"
@@ -46,11 +50,10 @@ let pc = pright (pstr ("pc ")) pstring |>> (fun a -> Pencolor(a)) <!> "pc"
 let penwidth = pright (pstr ("penwidth ")) pposnumber |>> (fun a -> Penwidth(a)) <!> "penwidth"
 let pw = pright (pstr ("pw ")) pposnumber |>> (fun a -> Penwidth(a)) <!> "pw"
 let loop = pright (pstr ("loop ")) (pseq pnuminparens pbrackets (fun(i,e) -> Loop(i,e))) <!> "loop"
-let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penwidth <|> pw <|> loop <!> "nonrecexpr"
+let assign = pright (pstr "let ") (pseq pstring (pright (pstr " = ") pnumber) (fun (str,n) -> Assign(str,n))) <!> "assign"
 
+let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penwidth <|> pw <|> loop <|> assign <!> "nonrecexpr"
 let seq = pseq (pleft nonrecexpr (pstr "; ")) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
-
-
 exprImpl := seq <|> nonrecexpr <!> "expr"
 let grammar = pleft expr peof <!> "grammar"
 

@@ -84,7 +84,7 @@ let argparse argv =
 [<EntryPoint>]
 let main argv =
     // default State
-    let aState = State(List.empty,Turtle(300,200,(PI/2.0)),Pen(1,"black",true))
+    let aState = State(List.empty,Turtle(300,200,(PI/2.0)),Pen(1,"black",true),Map.empty)
 
     // reading in .zig files
     if argv.[0].Contains ".zig" then 
@@ -96,7 +96,7 @@ let main argv =
         let x = match altInput with
             | Some expr ->  (eval expr aState)
             | None -> aState
-        let (c,_,_) = x
+        let (c,_,_,_) = x
         createSVG c
     // reading in user input from command line
     else 
@@ -110,5 +110,5 @@ let main argv =
     let x = match input with
             | Some expr ->  (eval expr aState)
             | None -> aState
-    let (c,_,_) = x
+    let (c,_,_,_) = x
     createSVG c

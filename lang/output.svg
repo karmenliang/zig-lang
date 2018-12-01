@@ -3,4 +3,4 @@
 
 <svg xmlns="http://www.w3.org/2000/svg" 
  xmlns:xlink="http://www.w3.org/1999/xlink" 
- width='600px' height='400px' style="background-color: pink;"><line x1='350' x2='300' y1='200' y2='200' stroke-width='1' stroke='black'/><line x1='350' x2='350' y1='150' y2='200' stroke-width='1' stroke='black'/><line x1='300' x2='350' y1='150' y2='150' stroke-width='1' stroke='black'/><line x1='300' x2='300' y1='200' y2='150' stroke-width='1' stroke='black'/></svg>
+ width='600px' height='400px' style="background-color: white;"></svg>
