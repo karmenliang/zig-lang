@@ -52,14 +52,11 @@ let achange s a' =
     let t' = Turtle(x,y,a')
     (c,t',p,ctx)
 
-// let valueprint v : string =
-//     match v with
-//     | ValueString s -> s
-//     | ValueNum n -> n.ToString()
-
 // for debugging
 let rec prettyprint e : string =
     match e with
+    | StringVal s -> "\"" + s + "\""
+    | NumVal n -> n.ToString()
     | Seq(e1,e2) -> prettyprint e1 + ";\n" + prettyprint e2
     | Ahead dist -> "ahead(" + dist.ToString() + ")"
     | Behind dist -> "behind(" + dist.ToString() + ")"
@@ -72,9 +69,18 @@ let rec prettyprint e : string =
     | Loop(i,e) -> "loop (" + i.ToString() + ")" + prettyprint e
     | Assign(v,e) -> v + " = " + e.ToString()
 
+// for debugging
+let valueprint v : string =
+    match v with
+    | ValueString s -> s
+    | ValueNum n -> n.ToString()
+    | ValueExpr e -> prettyprint e
+
 // default assumptions: pen is down and angle is PI/2
 let rec eval e s: State =
     match e with
+    | StringVal sv -> s
+    | NumVal n -> s
     | Ahead dist ->
         let x' = (xget s)-(xcomp s dist)
         let y' = (yget s)-(ycomp s dist)
@@ -115,9 +121,21 @@ let rec eval e s: State =
             let s1 = eval e s
             eval (Loop(i-1,e)) s1
         else s
-    // no assignment restrictions, globally dynamically scoped
+    // globally dynamically scoped
     | Assign(str,e) ->
-        let (c,t,p,ctx) = s
-        let ctx1 = Map.add str e ctx
-        printf "%A" ctx1
-        (c,t,p,ctx1)
+        let s1 = eval e s 
+        let (c,t,p,ctx) = s1
+        match e with
+        | StringVal sv ->
+            let ctx1 = Map.add str (ValueString sv) ctx
+            printfn "assign stringval: %A" ctx1
+            (c,t,p,ctx1)
+        | NumVal n ->
+            let ctx1 = Map.add str (ValueNum n) ctx
+            printfn "assign numval: %A" ctx1
+            (c,t,p,ctx1)
+        // BUG: does not properly assign Exprs
+        | _ ->
+            let ctx1 = Map.add str (ValueExpr e) ctx
+            printf "assign exprval: %A" ctx1
+            (c,t,p,ctx1)

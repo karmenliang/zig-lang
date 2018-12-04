@@ -3,6 +3,9 @@ module ProjectParser
 open Parser
 
 type Expr =
+| StringVal of string
+| NumVal of int
+//| Variable of string
 | Ahead of int
 | Behind of int
 | Clockwise of int
@@ -13,9 +16,14 @@ type Expr =
 | Pencolor of string
 | Penwidth of int
 | Loop of int*Expr
-| Assign of string*int
+| Assign of string*Expr
 
-type Context = Map<string,int>
+type Value =
+| ValueString of string
+| ValueNum of int
+| ValueExpr of Expr
+
+type Context = Map<string,Value>
 
 // x, y, angle
 type Turtle = int * int * float
@@ -31,7 +39,9 @@ let expr, exprImpl = recparser()
 // helper parsers
 let pposnumber = pmany1 pdigit |>> stringify |>> int <!> "pposnumber"
 let pnumber = pright (pchar '-') (pposnumber)  |>> (fun n -> -n) <|> pposnumber <!> "pnumber"
+let pnumberval = pnumber |>> (fun a -> NumVal(a)) <!> "pnumberval"
 let pstring = pmany1 pletter |>> stringify <!> "pstring"
+let pstringval = pstring |>> (fun a -> StringVal(a)) <!> "pstringval"
 let pnuminparens = pbetween (pchar '(') (pchar ')') pnumber <!> "pnuminparens"
 let pbrackets = pbetween (pchar '{') (pchar '}') expr <!> "pbrackets"
 
@@ -50,7 +60,10 @@ let pc = pright (pstr ("pc ")) pstring |>> (fun a -> Pencolor(a)) <!> "pc"
 let penwidth = pright (pstr ("penwidth ")) pposnumber |>> (fun a -> Penwidth(a)) <!> "penwidth"
 let pw = pright (pstr ("pw ")) pposnumber |>> (fun a -> Penwidth(a)) <!> "pw"
 let loop = pright (pstr ("loop ")) (pseq pnuminparens pbrackets (fun(i,e) -> Loop(i,e))) <!> "loop"
-let assign = pright (pstr "let ") (pseq pstring (pright (pstr " = ") pnumber) (fun (str,n) -> Assign(str,n))) <!> "assign"
+// value is either a string, number, or expression
+let value = pstringval <|> pnumberval <|> expr
+
+let assign = pright (pstr "let ") (pseq pstring (pright (pstr " = ") value) (fun (str,e) -> Assign(str,e))) <!> "assign"
 
 let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penwidth <|> pw <|> loop <|> assign <!> "nonrecexpr"
 let seq = pseq (pleft nonrecexpr (pstr "; ")) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"

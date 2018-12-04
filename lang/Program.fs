@@ -94,8 +94,8 @@ let main argv =
         | Some expr -> printfn "%s" (prettyprint expr)
         | None -> printfn "nope"
         let x = match altInput with
-            | Some expr ->  (eval expr aState)
-            | None -> aState
+                | Some expr ->  (eval expr aState)
+                | None -> aState
         let (c,_,_,_) = x
         createSVG c
     // reading in user input from command line
