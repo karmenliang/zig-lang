@@ -69,6 +69,7 @@ let rec prettyprint e : string =
     | Penwidth(i) -> "penwidth " + i.ToString()
     | Loop(i,e) -> "loop (" + i.ToString() + ")" + prettyprint e
     | Assign(v,e) -> v + " = " + e.ToString()
+    | Increment(str) -> str + "++"
 
 // for debugging
 let valueprint v : string =
@@ -157,3 +158,10 @@ let rec eval e s: State =
         //    printf "assign exprval: %A" ctx1
             failwith "can never happen" // Dan
             //(c,t,p,ctx1)
+    | Increment(str) ->
+        let (c,t,p,ctx) = s
+        let ni = match ctx.[str] with
+        | ValueNum n -> n
+        | _ -> failwith ""
+        let ctx1 = Map.add str (ValueNum (ni + 1)) ctx
+        (c,t,p,ctx1)

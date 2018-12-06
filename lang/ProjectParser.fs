@@ -18,6 +18,7 @@ type Expr =
 | Penwidth of int
 | Loop of int*Expr
 | Assign of string*Expr
+| Increment of string
 
 type Value =
 | ValueString of string
@@ -68,7 +69,9 @@ let value = pstringval <|> pnumberval <|> expr
 
 let assign = pright (pstr "let ") (pseq pstring (pright (pstr " = ") value) (fun (str,e) -> Assign(str,e))) <!> "assign"
 
-let nonrecexpr =  ahead <|> aheadvar <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penwidth <|> pw <|> loop <|> assign <!> "nonrecexpr"
+let increment = (pleft pstring (pstr "++") |>> fun (str) -> Increment(str)) <!> "increment"
+
+let nonrecexpr =  ahead <|> aheadvar <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penwidth <|> pw <|> assign <|> increment <|> loop <!> "nonrecexpr"
 let seq = pseq (pleft nonrecexpr (pstr "; ")) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 exprImpl := seq <|> nonrecexpr <!> "expr"
 let grammar = pleft expr peof <!> "grammar"
