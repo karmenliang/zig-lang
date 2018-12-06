@@ -59,6 +59,7 @@ let rec prettyprint e : string =
     | NumVal n -> n.ToString()
     | Seq(e1,e2) -> prettyprint e1 + ";\n" + prettyprint e2
     | Ahead dist -> "ahead(" + dist.ToString() + ")"
+    | AheadVar var -> "ahead(" + var + ")"
     | Behind dist -> "behind(" + dist.ToString() + ")"
     | Clockwise degrees -> "clockwise(" + degrees.ToString() + ")"
     | Counterwise degrees -> "counterwise(" + degrees.ToString() + ")"
@@ -74,7 +75,15 @@ let valueprint v : string =
     match v with
     | ValueString s -> s
     | ValueNum n -> n.ToString()
-    | ValueExpr e -> prettyprint e
+    //| ValueExpr e -> prettyprint e
+
+// let var v s : int =
+//     match v with
+//     | StringVal sv -> 
+//         let (c,t,p,ctx) = s
+//         let n = Map.find sv ctx
+
+//     | NumVal n -> n
 
 // default assumptions: pen is down and angle is PI/2
 let rec eval e s: State =
@@ -84,6 +93,14 @@ let rec eval e s: State =
     | Ahead dist ->
         let x' = (xget s)-(xcomp s dist)
         let y' = (yget s)-(ycomp s dist)
+        xychange s x' y'
+    | AheadVar var ->
+        let (c,t,p,ctx) = s
+        let ni = match ctx.[var] with
+        | ValueNum n -> n
+        | _ -> failwith ""
+        let x' = (xget s)-(xcomp s ni)
+        let y' = (yget s)-(ycomp s ni)
         xychange s x' y'
     | Behind dist ->
         let x' = (xget s)+(xcomp s dist)
@@ -136,6 +153,7 @@ let rec eval e s: State =
             (c,t,p,ctx1)
         // BUG: does not properly assign Exprs
         | _ ->
-            let ctx1 = Map.add str (ValueExpr e) ctx
-            printf "assign exprval: %A" ctx1
-            (c,t,p,ctx1)
+        //    let ctx1 = Map.add str (ValueExpr e) ctx
+        //    printf "assign exprval: %A" ctx1
+            failwith "can never happen" // Dan
+            //(c,t,p,ctx1)

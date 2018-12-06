@@ -7,6 +7,7 @@ type Expr =
 | NumVal of int
 //| Variable of string
 | Ahead of int
+| AheadVar of string
 | Behind of int
 | Clockwise of int
 | Counterwise of int
@@ -21,7 +22,7 @@ type Expr =
 type Value =
 | ValueString of string
 | ValueNum of int
-| ValueExpr of Expr
+//| ValueExpr of Expr
 
 type Context = Map<string,Value>
 
@@ -42,10 +43,12 @@ let pnumber = pright (pchar '-') (pposnumber)  |>> (fun n -> -n) <|> pposnumber 
 let pnumberval = pnumber |>> (fun a -> NumVal(a)) <!> "pnumberval"
 let pstring = pmany1 pletter |>> stringify <!> "pstring"
 let pstringval = pstring |>> (fun a -> StringVal(a)) <!> "pstringval"
+// let pvar = pnumberval <|> pstringval
 let pnuminparens = pbetween (pchar '(') (pchar ')') pnumber <!> "pnuminparens"
 let pbrackets = pbetween (pchar '{') (pchar '}') expr <!> "pbrackets"
 
 let ahead = pright (pstr ("ahead ")) pnumber |>> (fun a -> Ahead(a)) <!> "ahead"
+let aheadvar = pright (pstr ("ahead ")) pstring |>> (fun a -> AheadVar(a)) <!> "ahead"
 let a = pright (pstr ("a ")) pnumber |>> (fun a -> Ahead(a)) <!> "a"
 let behind = pright (pstr ("behind ")) pnumber |>> (fun a -> Behind(a)) <!> "behind"
 let b = pright (pstr ("b ")) pnumber |>> (fun a -> Behind(a)) <!> "b"
@@ -65,7 +68,7 @@ let value = pstringval <|> pnumberval <|> expr
 
 let assign = pright (pstr "let ") (pseq pstring (pright (pstr " = ") value) (fun (str,e) -> Assign(str,e))) <!> "assign"
 
-let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penwidth <|> pw <|> loop <|> assign <!> "nonrecexpr"
+let nonrecexpr =  ahead <|> aheadvar <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penwidth <|> pw <|> loop <|> assign <!> "nonrecexpr"
 let seq = pseq (pleft nonrecexpr (pstr "; ")) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 exprImpl := seq <|> nonrecexpr <!> "expr"
 let grammar = pleft expr peof <!> "grammar"
