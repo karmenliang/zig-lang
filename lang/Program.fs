@@ -46,13 +46,13 @@ let displaySVG(svgpath: string) : unit =
         exit 1
 
 let canvasSVGize (c:Canvas) : string =
-    let rec pl c : (string*string*string*string*string*string) list =
+    let rec pl c : (string*string*string*string*string*string*string*string) list =
        match c with
-       | (x1,y1,x2,y2,wid,col)::ctail -> (x1.ToString(),y1.ToString(),x2.ToString(),y2.ToString(),wid.ToString(),col) :: (pl ctail)
+       | (x1,y1,x2,y2,wid,(r,g,b))::ctail -> (x1.ToString(),y1.ToString(),x2.ToString(),y2.ToString(),wid.ToString(),r.ToString(), g.ToString(), b.ToString()) :: (pl ctail)
        | [] -> []
     let rec svglist list : string =
         match list with
-        | (x1,y1,x2,y2,wid,col)::tail -> "<line x1='" + x1 + "' x2='" + x2 + "' y1='" + y1 + "' y2='" + y2 + "' stroke-width='" + wid + "' stroke='" + col + "'/>" + (svglist tail)
+        | (x1,y1,x2,y2,wid,red,green,blue)::tail -> "<line x1='" + x1 + "' x2='" + x2 + "' y1='" + y1 + "' y2='" + y2 + "' stroke-width='" + wid + "' stroke='rgb(" + red + ", " + green + ", " + blue + ")'/>" + (svglist tail)
         | [] -> ""
     svglist (pl c)
 
@@ -84,7 +84,7 @@ let argparse argv =
 [<EntryPoint>]
 let main argv =
     // default State
-    let aState = State(List.empty,Turtle(300,200,(PI/2.0)),Pen(1,"black",true),Map.empty)
+    let aState = State(List.empty,Turtle(300,200,(PI/2.0)),Pen(1,(0,0,0),true),Map.empty)
 
     // reading in .zig files
     if argv.[0].Contains ".zig" then 

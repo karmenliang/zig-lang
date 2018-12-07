@@ -40,9 +40,9 @@ let xychange s x' y' =
     let (c,t,p,ctx) = s
     let (x,y,a) = t
     let t' = Turtle(x',y',a)
-    let (wid,col,down) = p
+    let (wid,rgb,down) = p
     if down then
-        let c' = Line(x,y,x',y',wid,col)::c
+        let c' = Line(x,y,x',y',wid,rgb)::c
         (c',t',p,ctx)
     else (c,t',p,ctx)
 
@@ -66,6 +66,10 @@ let rec prettyprint e : string =
     | Press -> "press"
     | Lift -> "lift"
     | Pencolor(str) -> "pencolor " + (str)
+    | Penred(x) -> "penred " + (x.ToString())
+    | Penredvar x -> "penred " + x
+    | Pengreen(x) -> "pengreen " + (x.ToString())
+    | Penblue(x) -> "penblue " + (x.ToString())
     | Penwidth(i) -> "penwidth " + i.ToString()
     | Loop(i,e) -> "loop (" + i.ToString() + ")" + prettyprint e
     | Assign(v,e) -> v + " = " + e.ToString()
@@ -127,10 +131,42 @@ let rec eval e s: State =
     | Seq(e1,e2) ->
         let s1 = eval e1 s
         eval e2 s1
-    | Pencolor(color) ->
+    | Pencolor(color) -> // CHANGE THIS
         let (c,t,p,ctx) = s
         let (w,_,d) = p
-        (c,t,Pen(w,color,d),ctx)
+        match color with
+        | "black" -> (c,t,Pen(w,(0,0,0),d),ctx)
+        | "red" -> (c,t,Pen(w,(255,0,0),d),ctx)
+        | "green" -> (c,t,Pen(w,(0,255,0),d),ctx)
+        | "blue" -> (c,t,Pen(w,(0,0,255),d),ctx)
+        | _ -> (c,t,Pen(w,(0,0,0),d),ctx)
+    | Penred(comp) ->
+        let (c,t,p,ctx) = s
+        let (w,rgb,d) = p
+        let (r,g,b) = rgb
+        let rgb' = (comp,g,b)
+        (c,t,Pen(w,rgb',d),ctx)
+    | Penredvar(var) ->
+        let (c,t,p,ctx) = s
+        let ni = match ctx.[var] with
+        | ValueNum n -> n
+        | _ -> failwith ""
+        let (w,rgb,d) = p
+        let (r,g,b) = rgb
+        let rgb' = (ni,g,b)
+        (c,t,Pen(w,rgb',d),ctx)
+    | Pengreen(comp) ->
+        let (c,t,p,ctx) = s
+        let (w,rgb,d) = p
+        let (r,g,b) = rgb
+        let rgb' = (r,comp,b)
+        (c,t,Pen(w,rgb',d),ctx)
+    | Penblue(comp) ->
+        let (c,t,p,ctx) = s
+        let (w,rgb,d) = p
+        let (r,g,b) = rgb
+        let rgb' = (r,g,comp)
+        (c,t,Pen(w,rgb',d),ctx)
     | Penwidth(i) ->
         let (c,t,p,ctx) = s
         let (_,color,d) = p
