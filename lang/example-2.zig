@@ -1,1 +1,3 @@
-loop (24){ahead 30; clockwise 15}
+loop (24) {
+    ahead 30; clockwise 15
+}

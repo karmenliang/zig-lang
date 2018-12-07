@@ -47,7 +47,7 @@ let pstring = pmany1 pletter |>> stringify <!> "pstring"
 let pstringval = pstring |>> (fun a -> StringVal(a)) <!> "pstringval"
 // let pvar = pnumberval <|> pstringval
 let pnuminparens = pbetween (pchar '(') (pchar ')') pnumber <!> "pnuminparens"
-let pbrackets = pbetween (pchar '{') (pchar '}') expr <!> "pbrackets"
+let pbrackets = pbetween (pseq (pchar '{') (pseq (pmany0 pnl) pws0 (fun (a,b) -> null)) (fun (x,y)-> x)) (pseq (pmany0 pnl) (pchar '}') (fun (x,y)-> y)) expr <!> "pbrackets"
 
 let ahead = pright (pstr ("ahead ")) pnumber |>> (fun a -> Ahead(a)) <!> "ahead"
 let aheadvar = pright (pstr ("ahead ")) pstring |>> (fun a -> AheadVar(a)) <!> "ahead"
@@ -64,16 +64,16 @@ let pencolor = pright (pstr ("pencolor ")) pstring |>> (fun a -> Pencolor(a)) <!
 let pc = pright (pstr ("pc ")) pstring |>> (fun a -> Pencolor(a)) <!> "pc"
 let penwidth = pright (pstr ("penwidth ")) pposnumber |>> (fun a -> Penwidth(a)) <!> "penwidth"
 let pw = pright (pstr ("pw ")) pposnumber |>> (fun a -> Penwidth(a)) <!> "pw"
-let loop = pright (pstr ("loop ")) (pseq pnuminparens pbrackets (fun(i,e) -> Loop(i,e))) <!> "loop"
+let loop = pright (pstr ("loop ")) (pseq (pleft pnuminparens pws0) pbrackets (fun(i,e) -> Loop(i,e))) <!> "loop"
 // value is either a string, number, or expression
 let value = pstringval <|> pnumberval <|> expr
 
-let assign = pright (pstr "let ") (pseq pstring (pright (pstr " = ") value) (fun (str,e) -> Assign(str,e))) <!> "assign"
+let assign = pright (pstr "let ") (pseq (pleft pstring pws0) (pright (pstr "=") (pright pws0 value)) (fun (str,e) -> Assign(str,e))) <!> "assign"
 
 let unaryincrement = (pleft pstring (pstr "++") |>> fun (str) -> UnaryIncrement(str)) <!> "increment"
-let increment = (pseq pstring (pright (pstr " += ") pnumber) (fun (str,e) -> Increment(str,e))) <!> "increment"
+let increment = (pseq (pleft pstring pws0) (pright (pstr "+=") (pright pws0 pnumber)) (fun (str,e) -> Increment(str,e))) <!> "increment"
 let nonrecexpr =  ahead <|> aheadvar <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penwidth <|> pw <|> assign <|> unaryincrement <|> increment <|> loop <!> "nonrecexpr"
-let seq = pseq (pleft nonrecexpr (pstr "; ")) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
+let seq = pseq (pleft nonrecexpr (pseq (pstr ";") pws0 (fun (x,y) -> null))) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 exprImpl := seq <|> nonrecexpr <!> "expr"
 let grammar = pleft expr peof <!> "grammar"
 
