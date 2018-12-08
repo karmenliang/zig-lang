@@ -107,14 +107,6 @@ let rec eval e s: State =
         let x' = (xget s)-(xcomp s dist)
         let y' = (yget s)-(ycomp s dist)
         xychange s x' y'
-    | AheadVar var ->
-        let (c,t,p,ctx) = s
-        let ni = match ctx.[var] with
-                 | ValueNum n -> n
-                 | _ -> failwith ""
-        let x' = (xget s)-(xcomp s ni)
-        let y' = (yget s)-(ycomp s ni)
-        xychange s x' y'
     | Behind dist ->
         let x' = (xget s)+(xcomp s dist)
         let y' = (yget s)+(ycomp s dist)

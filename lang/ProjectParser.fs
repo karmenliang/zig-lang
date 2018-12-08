@@ -9,7 +9,6 @@ type Expr =
 | NumExpr of int
 //| Variable of string
 | Ahead of Expr
-| AheadVar of string
 | Behind of int
 | Clockwise of int
 | Counterwise of int
@@ -58,7 +57,6 @@ let pbrackets = pbetween (pseq (pchar '{') (pseq (pmany0 pnl) pws0 (fun (a,b) ->
 
 // EXPR PARSERS
 let ahead = pright (pstr ("ahead ")) pvalue |>> (fun a -> Ahead(a)) <!> "ahead"
-let aheadvar = pright (pstr ("ahead ")) pstring |>> (fun a -> AheadVar(a)) <!> "ahead"
 let a = pright (pstr ("a ")) pvalue |>> (fun a -> Ahead(a)) <!> "a"
 let behind = pright (pstr ("behind ")) pnumber |>> (fun a -> Behind(a)) <!> "behind"
 let b = pright (pstr ("b ")) pnumber |>> (fun a -> Behind(a)) <!> "b"
