@@ -168,10 +168,11 @@ let rec eval e s: State =
         let (c,t,p,ctx) = s
         let (_,color,d) = p
         (c,t,Pen(width,color,d),ctx)
-    | Loop(i,e) ->
-        if (i > 0) then 
+    | Loop(arg,e) ->
+        let i = getnumval arg s
+        if (i > 0) then
             let s1 = eval e s
-            eval (Loop(i-1,e)) s1
+            eval (Loop(NumExpr (i-1),e)) s1
         else s
     // globally dynamically scoped
     | Assign(str,e) ->

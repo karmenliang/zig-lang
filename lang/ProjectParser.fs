@@ -16,7 +16,7 @@ type Expr =
 | Seq of Expr*Expr
 | Pencolor of string
 | Penwidth of Expr
-| Loop of int*Expr
+| Loop of Expr*Expr
 | Assign of string*Expr
 | UnaryIncrement of string
 | Increment of string*int
@@ -73,7 +73,7 @@ let pengreen = pright (pstr ("pengreen ")) pvalue |>> (fun a -> Pengreen(a)) <!>
 let penblue = pright (pstr ("penblue ")) pvalue |>> (fun a -> Penblue(a)) <!> "penblue"
 let penwidth = pright (pstr ("penwidth ")) pvalue |>> (fun a -> Penwidth(a)) <!> "penwidth"
 let pw = pright (pstr ("pw ")) pvalue |>> (fun a -> Penwidth(a)) <!> "pw"
-let loop = pright (pstr ("loop ")) (pseq (pleft pnuminparens pws0) pbrackets (fun(i,e) -> Loop(i,e))) <!> "loop"
+let loop = pright (pstr ("loop ")) (pseq (pleft (pbetween (pchar '(') (pchar ')') pvalue) pws0) pbrackets (fun(i,e) -> Loop(i,e))) <!> "loop"
 let assign = pright (pstr "let ") (pseq (pleft pstring pws0) (pright (pstr "=") (pright pws0 pvalue)) (fun (str,e) -> Assign(str,e))) <!> "assign"
 let unaryincrement = (pleft pstring (pstr "++") |>> fun (str) -> UnaryIncrement(str)) <!> "increment"
 let increment = (pseq (pleft pstring pws0) (pright (pstr "+=") (pright pws0 pnumber)) (fun (str,e) -> Increment(str,e))) <!> "increment"
