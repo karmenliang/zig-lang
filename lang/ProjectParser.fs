@@ -9,9 +9,9 @@ type Expr =
 | NumExpr of int
 //| Variable of string
 | Ahead of Expr
-| Behind of int
-| Clockwise of int
-| Counterwise of int
+| Behind of Expr
+| Clockwise of Expr
+| Counterwise of Expr
 | Press
 | Lift
 | Seq of Expr*Expr
@@ -58,12 +58,12 @@ let pbrackets = pbetween (pseq (pchar '{') (pseq (pmany0 pnl) pws0 (fun (a,b) ->
 // EXPR PARSERS
 let ahead = pright (pstr ("ahead ")) pvalue |>> (fun a -> Ahead(a)) <!> "ahead"
 let a = pright (pstr ("a ")) pvalue |>> (fun a -> Ahead(a)) <!> "a"
-let behind = pright (pstr ("behind ")) pnumber |>> (fun a -> Behind(a)) <!> "behind"
-let b = pright (pstr ("b ")) pnumber |>> (fun a -> Behind(a)) <!> "b"
-let clockwise = pright (pstr ("clockwise ")) pnumber |>> (fun a -> Clockwise(a)) <!> "clockwise"
-let cw = pright (pstr ("cw ")) pnumber |>> (fun a -> Clockwise(a)) <!> "cw"
-let counterwise = pright (pstr ("counterwise ")) pnumber |>> (fun a -> Counterwise(a)) <!> "counterwise"
-let ccw = pright (pstr ("ccw ")) pnumber |>> (fun a -> Counterwise(a)) <!> "ccw"
+let behind = pright (pstr ("behind ")) pvalue |>> (fun a -> Behind(a)) <!> "behind"
+let b = pright (pstr ("b ")) pvalue |>> (fun a -> Behind(a)) <!> "b"
+let clockwise = pright (pstr ("clockwise ")) pvalue |>> (fun a -> Clockwise(a)) <!> "clockwise"
+let cw = pright (pstr ("cw ")) pvalue |>> (fun a -> Clockwise(a)) <!> "cw"
+let counterwise = pright (pstr ("counterwise ")) pvalue |>> (fun a -> Counterwise(a)) <!> "counterwise"
+let ccw = pright (pstr ("ccw ")) pvalue |>> (fun a -> Counterwise(a)) <!> "ccw"
 
 let press = (pstr "press" |>> fun a -> Press) <!> "press"
 let lift = (pstr "lift" |>> fun a -> Lift) <!> "lift"
@@ -80,7 +80,7 @@ let assign = pright (pstr "let ") (pseq (pleft pstring pws0) (pright (pstr "=") 
 let unaryincrement = (pleft pstring (pstr "++") |>> fun (str) -> UnaryIncrement(str)) <!> "increment"
 let increment = (pseq (pleft pstring pws0) (pright (pstr "+=") (pright pws0 pnumber)) (fun (str,e) -> Increment(str,e))) <!> "increment"
 
-let nonrecexpr =  ahead <|> aheadvar <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penred <|> penredvar <|> pengreen <|> penblue <|> penwidth <|> pw <|> assign <|> unaryincrement <|> increment <|> loop <!> "nonrecexpr"
+let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penred <|> penredvar <|> pengreen <|> penblue <|> penwidth <|> pw <|> assign <|> unaryincrement <|> increment <|> loop <!> "nonrecexpr"
 let seq = pseq (pleft nonrecexpr (pseq (pstr ";") pws0 (fun (x,y) -> null))) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 exprImpl := seq <|> nonrecexpr <!> "expr"
 let grammar = pleft expr peof <!> "grammar"

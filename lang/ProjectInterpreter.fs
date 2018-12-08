@@ -59,7 +59,6 @@ let rec prettyprint e : string =
     | NumExpr n -> n.ToString()
     | Seq(e1,e2) -> prettyprint e1 + ";\n" + prettyprint e2
     | Ahead dist -> "ahead(" + dist.ToString() + ")"
-    | AheadVar var -> "ahead(" + var + ")"
     | Behind dist -> "behind(" + dist.ToString() + ")"
     | Clockwise degrees -> "clockwise(" + degrees.ToString() + ")"
     | Counterwise degrees -> "counterwise(" + degrees.ToString() + ")"
@@ -107,16 +106,19 @@ let rec eval e s: State =
         let x' = (xget s)-(xcomp s dist)
         let y' = (yget s)-(ycomp s dist)
         xychange s x' y'
-    | Behind dist ->
+    | Behind arg ->
+        let dist = getnumval arg s
         let x' = (xget s)+(xcomp s dist)
         let y' = (yget s)+(ycomp s dist)
         xychange s x' y'
-    | Clockwise degrees ->
-        let radians = toradians (float degrees)
+    | Clockwise arg ->
+        let degs = getnumval arg s
+        let radians = toradians (float degs)
         let a' = (aget s) + radians
         achange s a'
-    | Counterwise degrees ->
-        let radians = toradians (float degrees)
+    | Counterwise arg ->
+        let degs = getnumval arg s
+        let radians = toradians (float degs)
         let a' = (aget s) - radians
         achange s a'
     | Press ->
