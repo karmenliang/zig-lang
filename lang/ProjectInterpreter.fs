@@ -88,10 +88,8 @@ let getnumval (v : Expr) (s : State) : int =
         let (c,t,p,ctx) = s
         let n = match (Map.find sv ctx) with
                 | ValueNum num -> num
-                // correct exception handling?
                 | ValueString vs -> failwith ("Variable" + sv + " is not a number")
         n
-    // extract number
     | NumExpr n -> n
     // any other Expr is incorrect (not a variable or a number)
     | _ -> failwith "Argument must be a variable or number"
@@ -168,10 +166,12 @@ let rec eval e s: State =
         let (r,g,b) = rgb
         let rgb' = (r,g,comp)
         (c,t,Pen(w,rgb',d),ctx)
-    | Penwidth(i) ->
+    | Penwidth arg ->
+        let width = getnumval arg s
+        if width < 1 then failwith "Pen width must be positive"
         let (c,t,p,ctx) = s
         let (_,color,d) = p
-        (c,t,Pen(i,color,d),ctx)
+        (c,t,Pen(width,color,d),ctx)
     | Loop(i,e) ->
         if (i > 0) then 
             let s1 = eval e s

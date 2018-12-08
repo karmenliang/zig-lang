@@ -12,6 +12,9 @@ module Parser
 open System
 open System.Text.RegularExpressions
 
+// if true, will print out parser debugging statements
+let debug = false
+
 type Input = string * bool
 
 type Outcome<'a> =
@@ -147,10 +150,10 @@ let (<!>)(p: Parser<'a>)(label: string)(i: Input) : Outcome<'a> =
         let istr' = fst i'
         let nconsumed = istr.Length - istr'.Length
         let iconsumed = istr.[0..(nconsumed - 1)]
-        printfn "[success: %s, consumed: \"%s\", remaining: \"%s\"]" label iconsumed istr'
+        if debug = true then printfn "[success: %s, consumed: \"%s\", remaining: \"%s\"]" label iconsumed istr'
     | Failure        ->
         let istr = fst i
-        printfn "[failure: %s, remaining input: \"%s\"]" label istr
+        if debug = true then printfn "[failure: %s, remaining input: \"%s\"]" label istr
     o
 
 let stringify(cs: char list) : string = String.Join("", cs)
