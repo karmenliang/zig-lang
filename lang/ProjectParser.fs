@@ -7,7 +7,6 @@ open Parser
 type Expr =
 | StringExpr of string
 | NumExpr of int
-//| Variable of string
 | Ahead of Expr
 | Behind of Expr
 | Clockwise of Expr
@@ -21,15 +20,15 @@ type Expr =
 | Assign of string*Expr
 | UnaryIncrement of string
 | Increment of string*int
-| Penred of int
-| Penredvar of string
-| Pengreen of int
-| Penblue of int
+| Penred of Expr
+| Pengreen of Expr
+| Penblue of Expr
 
 type Value =
 | ValueString of string
 | ValueNum of int
 
+// stores variables of type Value
 type Context = Map<string,Value>
 
 // x, y, angle
@@ -37,7 +36,7 @@ type Turtle = int * int * float
 type RGB = int * int * int
 // width, color, press
 type Pen = int * RGB * bool
-// x1, y1, x2, y2, width, color name
+// x1, y1, x2, y2, width, RGB
 type Line = int * int * int * int * int * RGB
 type Canvas = Line list
 type State = Canvas * Turtle * Pen * Context
@@ -69,10 +68,9 @@ let press = (pstr "press" |>> fun a -> Press) <!> "press"
 let lift = (pstr "lift" |>> fun a -> Lift) <!> "lift"
 let pencolor = pright (pstr ("pencolor ")) pstring |>> (fun a -> Pencolor(a)) <!> "pencolor"
 let pc = pright (pstr ("pc ")) pstring |>> (fun a -> Pencolor(a)) <!> "pc"
-let penred = pright (pstr ("penred ")) pnumber |>> (fun a -> Penred(a)) <!> "penred"
-let penredvar = pright (pstr ("penred ")) pstring |>> (fun a -> Penredvar(a)) <!> "penred"
-let pengreen = pright (pstr ("pengreen ")) pnumber |>> (fun a -> Pengreen(a)) <!> "pengreen"
-let penblue = pright (pstr ("penblue ")) pnumber |>> (fun a -> Penblue(a)) <!> "penblue"
+let penred = pright (pstr ("penred ")) pvalue |>> (fun a -> Penred(a)) <!> "penred"
+let pengreen = pright (pstr ("pengreen ")) pvalue |>> (fun a -> Pengreen(a)) <!> "pengreen"
+let penblue = pright (pstr ("penblue ")) pvalue |>> (fun a -> Penblue(a)) <!> "penblue"
 let penwidth = pright (pstr ("penwidth ")) pvalue |>> (fun a -> Penwidth(a)) <!> "penwidth"
 let pw = pright (pstr ("pw ")) pvalue |>> (fun a -> Penwidth(a)) <!> "pw"
 let loop = pright (pstr ("loop ")) (pseq (pleft pnuminparens pws0) pbrackets (fun(i,e) -> Loop(i,e))) <!> "loop"
@@ -80,7 +78,7 @@ let assign = pright (pstr "let ") (pseq (pleft pstring pws0) (pright (pstr "=") 
 let unaryincrement = (pleft pstring (pstr "++") |>> fun (str) -> UnaryIncrement(str)) <!> "increment"
 let increment = (pseq (pleft pstring pws0) (pright (pstr "+=") (pright pws0 pnumber)) (fun (str,e) -> Increment(str,e))) <!> "increment"
 
-let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penred <|> penredvar <|> pengreen <|> penblue <|> penwidth <|> pw <|> assign <|> unaryincrement <|> increment <|> loop <!> "nonrecexpr"
+let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penred <|> pengreen <|> penblue <|> penwidth <|> pw <|> assign <|> unaryincrement <|> increment <|> loop <!> "nonrecexpr"
 let seq = pseq (pleft nonrecexpr (pseq (pstr ";") pws0 (fun (x,y) -> null))) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 exprImpl := seq <|> nonrecexpr <!> "expr"
 let grammar = pleft expr peof <!> "grammar"

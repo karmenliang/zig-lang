@@ -66,7 +66,6 @@ let rec prettyprint e : string =
     | Lift -> "lift"
     | Pencolor(str) -> "pencolor " + (str)
     | Penred(x) -> "penred " + (x.ToString())
-    | Penredvar x -> "penred " + x
     | Pengreen(x) -> "pengreen " + (x.ToString())
     | Penblue(x) -> "penblue " + (x.ToString())
     | Penwidth(i) -> "penwidth " + i.ToString()
@@ -139,28 +138,25 @@ let rec eval e s: State =
         | "green" -> (c,t,Pen(w,(0,255,0),d),ctx)
         | "blue" -> (c,t,Pen(w,(0,0,255),d),ctx)
         | _ -> (c,t,Pen(w,(0,0,0),d),ctx)
-    | Penred(comp) ->
+    | Penred arg ->
+        let comp = getnumval arg s
+        if comp < 1 then failwith "Penred must be positive"
         let (c,t,p,ctx) = s
         let (w,rgb,d) = p
-        let (r,g,b) = rgb
+        let (_,g,b) = rgb
         let rgb' = (comp,g,b)
         (c,t,Pen(w,rgb',d),ctx)
-    | Penredvar(var) ->
-        let (c,t,p,ctx) = s
-        let ni = match ctx.[var] with
-                 | ValueNum n -> n
-                 | _ -> failwith ""
-        let (w,rgb,d) = p
-        let (r,g,b) = rgb
-        let rgb' = (ni,g,b)
-        (c,t,Pen(w,rgb',d),ctx)
-    | Pengreen(comp) ->
+    | Pengreen arg ->
+        let comp = getnumval arg s
+        if comp < 1 then failwith "Pengreen must be positive"
         let (c,t,p,ctx) = s
         let (w,rgb,d) = p
         let (r,g,b) = rgb
         let rgb' = (r,comp,b)
         (c,t,Pen(w,rgb',d),ctx)
-    | Penblue(comp) ->
+    | Penblue arg ->
+        let comp = getnumval arg s
+        if comp < 1 then failwith "Penblue must be positive"
         let (c,t,p,ctx) = s
         let (w,rgb,d) = p
         let (r,g,b) = rgb
