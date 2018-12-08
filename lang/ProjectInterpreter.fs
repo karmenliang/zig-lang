@@ -55,8 +55,8 @@ let achange s a' =
 // for debugging
 let rec prettyprint e : string =
     match e with
-    | StringVal s -> "\"" + s + "\""
-    | NumVal n -> n.ToString()
+    | StringExpr s -> "\"" + s + "\""
+    | NumExpr n -> n.ToString()
     | Seq(e1,e2) -> prettyprint e1 + ";\n" + prettyprint e2
     | Ahead dist -> "ahead(" + dist.ToString() + ")"
     | AheadVar var -> "ahead(" + var + ")"
@@ -81,30 +81,37 @@ let valueprint v : string =
     match v with
     | ValueString s -> s
     | ValueNum n -> n.ToString()
-    //| ValueExpr e -> prettyprint e
 
-// let var v s : int =
-//     match v with
-//     | StringVal sv -> 
-//         let (c,t,p,ctx) = s
-//         let n = Map.find sv ctx
+let getnumval (v : Expr) (s : State) : int =
+    match v with
+    // if arg is a variable, extract value from Context Map
+    | StringExpr sv -> 
+        let (c,t,p,ctx) = s
+        let n = match (Map.find sv ctx) with
+                | ValueNum num -> num
+                // correct exception handling?
+                | ValueString vs -> failwith ("Variable" + sv + " is not a number")
+        n
+    // extract number
+    | NumExpr n -> n
+    // any other Expr is incorrect (not a variable or a number)
+    | _ -> failwith "Argument must be a variable or number"
 
-//     | NumVal n -> n
-
-// default assumptions: pen is down and angle is PI/2
+// default: pen is down and angle is PI/2
 let rec eval e s: State =
     match e with
-    | StringVal sv -> s
-    | NumVal n -> s
-    | Ahead dist ->
+    | StringExpr sv -> s
+    | NumExpr n -> s
+    | Ahead arg ->
+        let dist = getnumval arg s
         let x' = (xget s)-(xcomp s dist)
         let y' = (yget s)-(ycomp s dist)
         xychange s x' y'
     | AheadVar var ->
         let (c,t,p,ctx) = s
         let ni = match ctx.[var] with
-        | ValueNum n -> n
-        | _ -> failwith ""
+                 | ValueNum n -> n
+                 | _ -> failwith ""
         let x' = (xget s)-(xcomp s ni)
         let y' = (yget s)-(ycomp s ni)
         xychange s x' y'
@@ -149,8 +156,8 @@ let rec eval e s: State =
     | Penredvar(var) ->
         let (c,t,p,ctx) = s
         let ni = match ctx.[var] with
-        | ValueNum n -> n
-        | _ -> failwith ""
+                 | ValueNum n -> n
+                 | _ -> failwith ""
         let (w,rgb,d) = p
         let (r,g,b) = rgb
         let rgb' = (ni,g,b)
@@ -181,11 +188,11 @@ let rec eval e s: State =
         let s1 = eval e s 
         let (c,t,p,ctx) = s1
         match e with
-        | StringVal sv ->
+        | StringExpr sv ->
             let ctx1 = Map.add str (ValueString sv) ctx
             printfn "assign stringval: %A" ctx1
             (c,t,p,ctx1)
-        | NumVal n ->
+        | NumExpr n ->
             let ctx1 = Map.add str (ValueNum n) ctx
             printfn "assign numval: %A" ctx1
             (c,t,p,ctx1)
@@ -198,14 +205,14 @@ let rec eval e s: State =
     | UnaryIncrement(str) ->
         let (c,t,p,ctx) = s
         let ni = match ctx.[str] with
-        | ValueNum n -> n
-        | _ -> failwith ""
+                 | ValueNum n -> n
+                 | _ -> failwith ""
         let ctx1 = Map.add str (ValueNum (ni + 1)) ctx
         (c,t,p,ctx1)
     | Increment(str,e) ->
         let (c,t,p,ctx) = s
         let ni = match ctx.[str] with
-        | ValueNum n -> n
-        | _ -> failwith ""
+                 | ValueNum n -> n
+                 | _ -> failwith ""
         let ctx1 = Map.add str (ValueNum (ni + e)) ctx
         (c,t,p,ctx1)
