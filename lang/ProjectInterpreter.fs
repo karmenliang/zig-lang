@@ -77,6 +77,7 @@ let rec prettyprint e : string =
     | Decrement(str,e) -> str + " -= " + e.ToString()
     | GoHome -> "home"
     | SetHome(a,b) -> "sethome " + a.ToString() + ", " + b.ToString()
+    | PenRGB(a,b,c) -> "penrgb " + a.ToString() + ", " + b.ToString()+ ", " + c.ToString()
 
 // for debugging
 let valueprint v : string =
@@ -242,3 +243,15 @@ let rec eval e s: State =
         let h' = Home(a,b)
         let bound' = (d,h')
         (c,t,p,ctx,bound')
+    | PenRGB(rarg,garg,barg) ->
+        let rcomp = getnumval rarg s
+        if rcomp < 1 then failwith "Penred must be positive"
+        let gcomp = getnumval garg s
+        if gcomp < 1 then failwith "Pengreen must be positive"
+        let bcomp = getnumval barg s
+        if bcomp < 1 then failwith "Penblue must be positive"
+        let (c,t,p,ctx,bound) = s
+        let (w,rgb,d) = p
+        let (r,g,b) = rgb
+        let rgb' = (rcomp,gcomp,bcomp)
+        (c,t,Pen(w,rgb',d),ctx,bound)

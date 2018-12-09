@@ -24,6 +24,7 @@ type Expr =
 | Increment of string*int
 | UnaryDecrement of string
 | Decrement of string*int
+| PenRGB of Expr*Expr*Expr
 | Penred of Expr
 | Pengreen of Expr
 | Penblue of Expr
@@ -88,7 +89,8 @@ let unarydecrement = (pleft pstring (pstr "--") |>> fun (str) -> UnaryDecrement(
 let decrement = (pseq (pleft pstring pws0) (pright (pstr "-=") (pright pws0 pnumber)) (fun (str,e) -> Decrement(str,e))) <!> "decrement"
 let home = (pstr "home" |>> fun a -> GoHome) <!> "home"
 let sethome = pright (pstr "sethome ") (pseq pnumber (pright (pstr ", ") pnumber) (fun (a,b) -> SetHome(a,b))) <!> "sethome"
-let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penred <|> pengreen <|> penblue <|> penwidth <|> pw <|> assign <|> unaryincrement <|> increment <|> unarydecrement <|> decrement <|> home <|> sethome <|> loop <!> "nonrecexpr"
+let penrgb = pright (pstr "penrgb ") (pseq (pseq pvalue (pright (pstr ", ") pvalue) (fun (a,b) -> (a,b))) (pright (pstr ", ") pvalue) (fun ((a,b),c) -> PenRGB(a,b,c)))
+let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penred <|> pengreen <|> penblue <|> penwidth <|> pw <|> assign <|> unaryincrement <|> increment <|> unarydecrement <|> decrement <|> home <|> sethome <|> penrgb <|> loop <!> "nonrecexpr"
 let seq = pseq (pleft nonrecexpr (pseq (pstr ";") pws0 (fun (x,y) -> null))) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 exprImpl := seq <|> nonrecexpr <!> "expr"
 let grammar = pleft expr peof <!> "grammar"
