@@ -5,14 +5,16 @@ open ProjectParser
 open ProjectInterpreter
 open System.ComponentModel
 
-let svgDraw guts =
+let svgDraw guts (s: State) =
     // default canvas size of 600x400px 
+    let (_,_,_,_,b) = s
+    let (d,_) = b
+    let (width, height) = d
     let header = """<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" 
  "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
 
 <svg xmlns="http://www.w3.org/2000/svg" 
- xmlns:xlink="http://www.w3.org/1999/xlink" 
- width='600px' height='400px' style="background-color: white;">""" // how to change background color?
+ xmlns:xlink="http://www.w3.org/1999/xlink" """ + "width='" + width.ToString() + "px' height='" + height.ToString() + "px' style='background-color: white;'>" // how to change background color?
 
     let footer = """</svg>"""
     header + guts + footer
@@ -56,12 +58,13 @@ let canvasSVGize (c:Canvas) : string =
         | [] -> ""
     svglist (pl c)
 
-let createSVG c =
-    let svg = svgDraw (canvasSVGize c)
+let createSVG (x: State) =
+    let (c,_,_,_,_) = x
+    let svg = svgDraw (canvasSVGize c) x
     printfn "Writing an SVG to a file and opening with your web browser..."
     File.WriteAllText("output.svg", svg)
     displaySVG "output.svg"
-    Threading.Thread.Sleep(5000) // wait for the web browser to start up
+    //Threading.Thread.Sleep(5000) // wait for the web browser to start up
     //File.Delete "output.svg" // cleanup
     0
 
@@ -84,7 +87,7 @@ let argparse argv =
 [<EntryPoint>]
 let main argv =
     // default State
-    let aState = State(List.empty,Turtle(300,200,(PI/2.0)),Pen(1,(0,0,0),true),Map.empty)
+    let aState = State(List.empty,Turtle(300,200,(PI/2.0)),Pen(1,(0,0,0),true),Map.empty,Boundaries(Dimensions(600,400),Home(300,200)))
 
     // reading in .zig files
     if argv.[0].Contains ".zig" then 
@@ -96,8 +99,8 @@ let main argv =
         let x = match altInput with
                 | Some expr ->  (eval expr aState)
                 | None -> aState
-        let (c,_,_,_) = x
-        createSVG c
+        let (c,_,_,_,_) = x
+        createSVG x
     // reading in user input from command line
     else 
     let input = parse (argparse argv)
@@ -110,5 +113,5 @@ let main argv =
     let x = match input with
             | Some expr ->  (eval expr aState)
             | None -> aState
-    let (c,_,_,_) = x
-    createSVG c
+    let (c,_,_,_,_) = x
+    createSVG x

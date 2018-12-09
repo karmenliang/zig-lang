@@ -10,47 +10,47 @@ let toradians degrees =
     degrees * PI / 180.0
 
 let aget s =
-    let (_,t,_,_) = s
+    let (_,t,_,_,_) = s
     let (x,y,a) = t
     a
 
 let xget s =
-    let (_,t,_,_) = s
+    let (_,t,_,_,_) = s
     let (x,y,a) = t
     x
 
 let yget s =
-    let (_,t,_,_) = s
+    let (_,t,_,_,_) = s
     let (x,y,a) = t
     y
 
 let xcomp s dist =
-    let (_,t,_,_) = s
+    let (_,t,_,_,_) = s
     let (x,y,a) = t
     let dist' = round((float dist) * (cos a))
     dist'
 
 let ycomp s dist =
-    let (_,t,_,_) = s
+    let (_,t,_,_,_) = s
     let (x,y,a) = t
     let dist' = round((float dist) * (sin a))
     dist'
 
 let xychange s x' y' =
-    let (c,t,p,ctx) = s
+    let (c,t,p,ctx,b) = s
     let (x,y,a) = t
     let t' = Turtle(x',y',a)
     let (wid,rgb,down) = p
     if down then
         let c' = Line(x,y,x',y',wid,rgb)::c
-        (c',t',p,ctx)
-    else (c,t',p,ctx)
+        (c',t',p,ctx,b)
+    else (c,t',p,ctx,b)
 
 let achange s a' =
-    let (c,t,p,ctx) = s
+    let (c,t,p,ctx,b) = s
     let (x,y,a) = t
     let t' = Turtle(x,y,a')
-    (c,t',p,ctx)
+    (c,t',p,ctx,b)
 
 // for debugging
 let rec prettyprint e : string =
@@ -75,6 +75,8 @@ let rec prettyprint e : string =
     | Increment(str,e) -> str + " += " + e.ToString()
     | UnaryDecrement(str) -> str + "--"
     | Decrement(str,e) -> str + " -= " + e.ToString()
+    | GoHome -> "home"
+    | SetHome(a,b) -> "sethome " + a.ToString() + ", " + b.ToString()
 
 // for debugging
 let valueprint v : string =
@@ -86,7 +88,7 @@ let getnumval (v : Expr) (s : State) : int =
     match v with
     // if arg is a variable, extract value from Context Map
     | StringExpr sv -> 
-        let (c,t,p,ctx) = s
+        let (c,t,p,ctx,b) = s
         let n = match (Map.find sv ctx) with
                 | ValueNum num -> num
                 | ValueString vs -> failwith ("Variable" + sv + " is not a number")
@@ -121,55 +123,55 @@ let rec eval e s: State =
         let a' = (aget s) - radians
         achange s a'
     | Press ->
-        let (c,t,p,ctx) = s
+        let (c,t,p,ctx,b) = s
         let (w,color,_) = p
-        (c,t,Pen(w,color,true),ctx)
+        (c,t,Pen(w,color,true),ctx,b)
     | Lift ->
-        let (c,t,p,ctx) = s
+        let (c,t,p,ctx,b) = s
         let (w,color,_) = p
-        (c,t,Pen(w,color,false),ctx)
+        (c,t,Pen(w,color,false),ctx,b)
     | Seq(e1,e2) ->
         let s1 = eval e1 s
         eval e2 s1
     | Pencolor(color) -> // CHANGE THIS
-        let (c,t,p,ctx) = s
+        let (c,t,p,ctx,b) = s
         let (w,_,d) = p
         match color with
-        | "black" -> (c,t,Pen(w,(0,0,0),d),ctx)
-        | "red" -> (c,t,Pen(w,(255,0,0),d),ctx)
-        | "green" -> (c,t,Pen(w,(0,255,0),d),ctx)
-        | "blue" -> (c,t,Pen(w,(0,0,255),d),ctx)
-        | _ -> (c,t,Pen(w,(0,0,0),d),ctx)
+        | "black" -> (c,t,Pen(w,(0,0,0),d),ctx,b)
+        | "red" -> (c,t,Pen(w,(255,0,0),d),ctx,b)
+        | "green" -> (c,t,Pen(w,(0,255,0),d),ctx,b)
+        | "blue" -> (c,t,Pen(w,(0,0,255),d),ctx,b)
+        | _ -> (c,t,Pen(w,(0,0,0),d),ctx,b)
     | Penred arg ->
         let comp = getnumval arg s
         if comp < 1 then failwith "Penred must be positive"
-        let (c,t,p,ctx) = s
+        let (c,t,p,ctx,bound) = s
         let (w,rgb,d) = p
         let (_,g,b) = rgb
         let rgb' = (comp,g,b)
-        (c,t,Pen(w,rgb',d),ctx)
+        (c,t,Pen(w,rgb',d),ctx,bound)
     | Pengreen arg ->
         let comp = getnumval arg s
         if comp < 1 then failwith "Pengreen must be positive"
-        let (c,t,p,ctx) = s
+        let (c,t,p,ctx,bound) = s
         let (w,rgb,d) = p
         let (r,g,b) = rgb
         let rgb' = (r,comp,b)
-        (c,t,Pen(w,rgb',d),ctx)
+        (c,t,Pen(w,rgb',d),ctx,bound)
     | Penblue arg ->
         let comp = getnumval arg s
         if comp < 1 then failwith "Penblue must be positive"
-        let (c,t,p,ctx) = s
+        let (c,t,p,ctx,bound) = s
         let (w,rgb,d) = p
         let (r,g,b) = rgb
         let rgb' = (r,g,comp)
-        (c,t,Pen(w,rgb',d),ctx)
+        (c,t,Pen(w,rgb',d),ctx,bound)
     | Penwidth arg ->
         let width = getnumval arg s
         if width < 1 then failwith "Pen width must be positive"
-        let (c,t,p,ctx) = s
+        let (c,t,p,ctx,bound) = s
         let (_,color,d) = p
-        (c,t,Pen(width,color,d),ctx)
+        (c,t,Pen(width,color,d),ctx,bound)
     | Loop(arg,e) ->
         let i = getnumval arg s
         if (i > 0) then
@@ -179,16 +181,16 @@ let rec eval e s: State =
     // globally dynamically scoped
     | Assign(str,e) ->
         let s1 = eval e s 
-        let (c,t,p,ctx) = s1
+        let (c,t,p,ctx,bound) = s1
         match e with
         | StringExpr sv ->
             let ctx1 = Map.add str (ValueString sv) ctx
             printfn "assign stringval: %A" ctx1
-            (c,t,p,ctx1)
+            (c,t,p,ctx1,bound)
         | NumExpr n ->
             let ctx1 = Map.add str (ValueNum n) ctx
             printfn "assign numval: %A" ctx1
-            (c,t,p,ctx1)
+            (c,t,p,ctx1,bound)
         // BUG: does not properly assign Exprs
         | _ ->
         //    let ctx1 = Map.add str (ValueExpr e) ctx
@@ -196,30 +198,47 @@ let rec eval e s: State =
             failwith "can never happen" // Dan
             //(c,t,p,ctx1)
     | UnaryIncrement(str) ->
-        let (c,t,p,ctx) = s
+        let (c,t,p,ctx,bound) = s
         let ni = match ctx.[str] with
                  | ValueNum n -> n
                  | _ -> failwith ""
         let ctx1 = Map.add str (ValueNum (ni + 1)) ctx
-        (c,t,p,ctx1)
+        (c,t,p,ctx1,bound)
     | Increment(str,e) ->
-        let (c,t,p,ctx) = s
+        let (c,t,p,ctx,bound) = s
         let ni = match ctx.[str] with
                  | ValueNum n -> n
                  | _ -> failwith ""
         let ctx1 = Map.add str (ValueNum (ni + e)) ctx
-        (c,t,p,ctx1)
+        (c,t,p,ctx1,bound)
     | UnaryDecrement(str) ->
-        let (c,t,p,ctx) = s
+        let (c,t,p,ctx,bound) = s
         let ni = match ctx.[str] with
                  | ValueNum n -> n
                  | _ -> failwith ""
         let ctx1 = Map.add str (ValueNum (ni - 1)) ctx
-        (c,t,p,ctx1)
+        (c,t,p,ctx1,bound)
     | Decrement(str,e) ->
-        let (c,t,p,ctx) = s
+        let (c,t,p,ctx,bound) = s
         let ni = match ctx.[str] with
                  | ValueNum n -> n
                  | _ -> failwith ""
         let ctx1 = Map.add str (ValueNum (ni - e)) ctx
-        (c,t,p,ctx1)
+        (c,t,p,ctx1,bound)
+    | GoHome ->
+        let (c,t,p,ctx,bound) = s
+        let (d,h) = bound
+        let (xhome,yhome) = h
+        let (x,y,a) = t
+        let t' = Turtle(xhome,yhome,(PI/2.0))
+        let (wid,rgb,down) = p
+        if down then
+            let c' = Line(x,y,xhome,yhome,wid,rgb)::c
+            (c',t',p,ctx,bound)
+        else (c,t',p,ctx,bound)
+    | SetHome(a,b) ->
+        let (c,t,p,ctx,bound) = s
+        let (d,h) = bound
+        let h' = Home(a,b)
+        let bound' = (d,h')
+        (c,t,p,ctx,bound')

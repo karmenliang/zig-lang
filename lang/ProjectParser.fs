@@ -13,6 +13,8 @@ type Expr =
 | Counterwise of Expr
 | Press
 | Lift
+| GoHome
+| SetHome of int*int
 | Seq of Expr*Expr
 | Pencolor of string
 | Penwidth of Expr
@@ -35,13 +37,16 @@ type Context = Map<string,Value>
 
 // x, y, angle
 type Turtle = int * int * float
+type Home = int * int
+type Dimensions = int * int
+type Boundaries = Dimensions * Home
 type RGB = int * int * int
 // width, color, press
 type Pen = int * RGB * bool
 // x1, y1, x2, y2, width, RGB
 type Line = int * int * int * int * int * RGB
-type Canvas = Line list
-type State = Canvas * Turtle * Pen * Context
+type Canvas = Line list 
+type State = Canvas * Turtle * Pen * Context * Boundaries
 
 let expr, exprImpl = recparser()
 
@@ -81,7 +86,9 @@ let unaryincrement = (pleft pstring (pstr "++") |>> fun (str) -> UnaryIncrement(
 let increment = (pseq (pleft pstring pws0) (pright (pstr "+=") (pright pws0 pnumber)) (fun (str,e) -> Increment(str,e))) <!> "increment"
 let unarydecrement = (pleft pstring (pstr "--") |>> fun (str) -> UnaryDecrement(str)) <!> "unarydecrement"
 let decrement = (pseq (pleft pstring pws0) (pright (pstr "-=") (pright pws0 pnumber)) (fun (str,e) -> Decrement(str,e))) <!> "decrement"
-let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penred <|> pengreen <|> penblue <|> penwidth <|> pw <|> assign <|> unaryincrement <|> increment <|> unarydecrement <|> decrement <|> loop <!> "nonrecexpr"
+let home = (pstr "home" |>> fun a -> GoHome) <!> "home"
+let sethome = pright (pstr "sethome ") (pseq pnumber (pright (pstr ", ") pnumber) (fun (a,b) -> SetHome(a,b))) <!> "sethome"
+let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penred <|> pengreen <|> penblue <|> penwidth <|> pw <|> assign <|> unaryincrement <|> increment <|> unarydecrement <|> decrement <|> home <|> sethome <|> loop <!> "nonrecexpr"
 let seq = pseq (pleft nonrecexpr (pseq (pstr ";") pws0 (fun (x,y) -> null))) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 exprImpl := seq <|> nonrecexpr <!> "expr"
 let grammar = pleft expr peof <!> "grammar"
