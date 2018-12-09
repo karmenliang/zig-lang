@@ -146,7 +146,6 @@ let rec eval e s: State =
         | _ -> (c,t,Pen(w,(0,0,0),d),ctx,b)
     | Penred arg ->
         let comp = getnumval arg s
-        if comp < 1 then failwith "Penred must be positive"
         let (c,t,p,ctx,bound) = s
         let (w,rgb,d) = p
         let (_,g,b) = rgb
@@ -154,7 +153,6 @@ let rec eval e s: State =
         (c,t,Pen(w,rgb',d),ctx,bound)
     | Pengreen arg ->
         let comp = getnumval arg s
-        if comp < 1 then failwith "Pengreen must be positive"
         let (c,t,p,ctx,bound) = s
         let (w,rgb,d) = p
         let (r,g,b) = rgb
@@ -162,7 +160,6 @@ let rec eval e s: State =
         (c,t,Pen(w,rgb',d),ctx,bound)
     | Penblue arg ->
         let comp = getnumval arg s
-        if comp < 1 then failwith "Penblue must be positive"
         let (c,t,p,ctx,bound) = s
         let (w,rgb,d) = p
         let (r,g,b) = rgb
@@ -260,11 +257,8 @@ let rec eval e s: State =
         (c,t,p,ctx,bound')
     | PenRGB(rarg,garg,barg) ->
         let rcomp = getnumval rarg s
-        if rcomp < 1 then failwith "Penred must be positive"
         let gcomp = getnumval garg s
-        if gcomp < 1 then failwith "Pengreen must be positive"
         let bcomp = getnumval barg s
-        if bcomp < 1 then failwith "Penblue must be positive"
         let (c,t,p,ctx,bound) = s
         let (w,rgb,d) = p
         let (r,g,b) = rgb
