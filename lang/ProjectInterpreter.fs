@@ -77,6 +77,7 @@ let rec prettyprint e : string =
     | Decrement(str,e) -> str + " -= " + e.ToString()
     | GoHome -> "home"
     | SetHome(a,b) -> "sethome " + a.ToString() + ", " + b.ToString()
+    | SetDimensions(a,b) -> "setdimensions " + a.ToString() + ", " + b.ToString()
     | PenRGB(a,b,c) -> "penrgb " + a.ToString() + ", " + b.ToString()+ ", " + c.ToString()
 
 // for debugging
@@ -238,10 +239,24 @@ let rec eval e s: State =
             (c',t',p,ctx,bound)
         else (c,t',p,ctx,bound)
     | SetHome(a,b) ->
+        let acomp = getnumval a s
+        if acomp < 1 then failwith "xcomp must be positive"
+        let bcomp = getnumval b s
+        if bcomp < 1 then failwith "ycomp must be positive"
         let (c,t,p,ctx,bound) = s
         let (d,h) = bound
-        let h' = Home(a,b)
+        let h' = Home(acomp,bcomp)
         let bound' = (d,h')
+        (c,t,p,ctx,bound')
+    | SetDimensions(a,b) ->
+        let acomp = getnumval a s
+        if acomp < 1 then failwith "xcomp must be positive"
+        let bcomp = getnumval b s
+        if bcomp < 1 then failwith "ycomp must be positive"
+        let (c,t,p,ctx,bound) = s
+        let (d,h) = bound
+        let d' = Dimensions(acomp,bcomp)
+        let bound' = (d',h)
         (c,t,p,ctx,bound')
     | PenRGB(rarg,garg,barg) ->
         let rcomp = getnumval rarg s
