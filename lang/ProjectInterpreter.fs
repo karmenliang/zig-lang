@@ -73,6 +73,8 @@ let rec prettyprint e : string =
     | Assign(v,e) -> v + " = " + e.ToString()
     | UnaryIncrement(str) -> str + "++"
     | Increment(str,e) -> str + " += " + e.ToString()
+    | UnaryDecrement(str) -> str + "--"
+    | Decrement(str,e) -> str + " -= " + e.ToString()
 
 // for debugging
 let valueprint v : string =
@@ -206,4 +208,18 @@ let rec eval e s: State =
                  | ValueNum n -> n
                  | _ -> failwith ""
         let ctx1 = Map.add str (ValueNum (ni + e)) ctx
+        (c,t,p,ctx1)
+    | UnaryDecrement(str) ->
+        let (c,t,p,ctx) = s
+        let ni = match ctx.[str] with
+                 | ValueNum n -> n
+                 | _ -> failwith ""
+        let ctx1 = Map.add str (ValueNum (ni - 1)) ctx
+        (c,t,p,ctx1)
+    | Decrement(str,e) ->
+        let (c,t,p,ctx) = s
+        let ni = match ctx.[str] with
+                 | ValueNum n -> n
+                 | _ -> failwith ""
+        let ctx1 = Map.add str (ValueNum (ni - e)) ctx
         (c,t,p,ctx1)

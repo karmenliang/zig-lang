@@ -20,6 +20,8 @@ type Expr =
 | Assign of string*Expr
 | UnaryIncrement of string
 | Increment of string*int
+| UnaryDecrement of string
+| Decrement of string*int
 | Penred of Expr
 | Pengreen of Expr
 | Penblue of Expr
@@ -75,10 +77,11 @@ let penwidth = pright (pstr ("penwidth ")) pvalue |>> (fun a -> Penwidth(a)) <!>
 let pw = pright (pstr ("pw ")) pvalue |>> (fun a -> Penwidth(a)) <!> "pw"
 let loop = pright (pstr ("loop ")) (pseq (pleft (pbetween (pchar '(') (pchar ')') pvalue) pws0) pbrackets (fun(i,e) -> Loop(i,e))) <!> "loop"
 let assign = pright (pstr "let ") (pseq (pleft pstring pws0) (pright (pstr "=") (pright pws0 pvalue)) (fun (str,e) -> Assign(str,e))) <!> "assign"
-let unaryincrement = (pleft pstring (pstr "++") |>> fun (str) -> UnaryIncrement(str)) <!> "increment"
+let unaryincrement = (pleft pstring (pstr "++") |>> fun (str) -> UnaryIncrement(str)) <!> "unaryincrement"
 let increment = (pseq (pleft pstring pws0) (pright (pstr "+=") (pright pws0 pnumber)) (fun (str,e) -> Increment(str,e))) <!> "increment"
-
-let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penred <|> pengreen <|> penblue <|> penwidth <|> pw <|> assign <|> unaryincrement <|> increment <|> loop <!> "nonrecexpr"
+let unarydecrement = (pleft pstring (pstr "--") |>> fun (str) -> UnaryDecrement(str)) <!> "unarydecrement"
+let decrement = (pseq (pleft pstring pws0) (pright (pstr "-=") (pright pws0 pnumber)) (fun (str,e) -> Decrement(str,e))) <!> "decrement"
+let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penred <|> pengreen <|> penblue <|> penwidth <|> pw <|> assign <|> unaryincrement <|> increment <|> unarydecrement <|> decrement <|> loop <!> "nonrecexpr"
 let seq = pseq (pleft nonrecexpr (pseq (pstr ";") pws0 (fun (x,y) -> null))) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 exprImpl := seq <|> nonrecexpr <!> "expr"
 let grammar = pleft expr peof <!> "grammar"
