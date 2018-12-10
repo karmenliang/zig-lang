@@ -91,18 +91,29 @@ let valueprint v : string =
         | ValueNum n -> n.ToString()
     else ""
 
-let getnumval (v : Expr) (s : State) : int =
+exception ValueStringError of string
+exception NumExprError of string
+
+let getnumval (v : Expr) (s : State) =
     match v with
-    // if arg is a variable, extract value from Context Map
+    // extract value of variable from Context Map
     | StringExpr sv -> 
         let (c,t,p,ctx,b) = s
-        let n = match (Map.find sv ctx) with
-                | ValueNum num -> num
-                | ValueString vs -> failwith ("Variable" + sv + " is not a number")
-        n
+        let n =
+            try
+                Map.find sv ctx
+            with
+                :? System.Collections.Generic.KeyNotFoundException as e -> 
+                    printfn "%s is not a valid variable." sv
+                    ValueString ""
+        // variable must hold a number value
+        match n with
+        | ValueNum num -> num
+        | ValueString vs -> invalidArg vs "Variable is not a number."
+   // extract number from NumExpr type
     | NumExpr n -> n
     // any other Expr is incorrect (not a variable or a number)
-    | _ -> failwith "Argument must be a variable or number"
+    | _ -> failwith "Argument must be a variable or number."
 
 // default: pen is down and angle is PI/2
 let rec eval e s: State =

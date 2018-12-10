@@ -69,7 +69,7 @@ let createSVG (x: State) =
     0
 
 let usage() =
-    printfn "Usage: dotnet run \"<s>\", where <s> is a Turtle expression"
+    printfn "Usage: dotnet run \"<s>\", where <s> is a valid Zig expression"
     exit 1
 
 let argparse argv =
@@ -108,7 +108,7 @@ let main argv =
     // for debugging
     match input with
     | Some expr -> printfn "%s" (prettyprint expr)
-    | None -> printfn "nope"
+    | None -> printfn "Did not parse. Enter a valid Zig expression."
 
     let x = match input with
             | Some expr ->  (eval expr aState)
