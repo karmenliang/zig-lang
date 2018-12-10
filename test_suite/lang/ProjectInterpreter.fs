@@ -3,6 +3,7 @@ open ProjectParser
 open Parser
 open System
 
+let debug = false
 let PI = 3.14159265358979
 let round (x:float) = int(Math.Round(x))
 
@@ -54,37 +55,41 @@ let achange s a' =
 
 // for debugging
 let rec prettyprint e : string =
-    match e with
-    | StringExpr s -> "\"" + s + "\""
-    | NumExpr n -> n.ToString()
-    | Seq(e1,e2) -> prettyprint e1 + ";\n" + prettyprint e2
-    | Ahead dist -> "ahead(" + dist.ToString() + ")"
-    | Behind dist -> "behind(" + dist.ToString() + ")"
-    | Clockwise degrees -> "clockwise(" + degrees.ToString() + ")"
-    | Counterwise degrees -> "counterwise(" + degrees.ToString() + ")"
-    | Press -> "press"
-    | Lift -> "lift"
-    | Pencolor(str) -> "pencolor " + (str)
-    | Penred(x) -> "penred " + (x.ToString())
-    | Pengreen(x) -> "pengreen " + (x.ToString())
-    | Penblue(x) -> "penblue " + (x.ToString())
-    | Penwidth(i) -> "penwidth " + i.ToString()
-    | Loop(i,e) -> "loop (" + i.ToString() + ")" + prettyprint e
-    | Assign(v,e) -> v + " = " + e.ToString()
-    | UnaryIncrement(str) -> str + "++"
-    | Increment(str,e) -> str + " += " + e.ToString()
-    | UnaryDecrement(str) -> str + "--"
-    | Decrement(str,e) -> str + " -= " + e.ToString()
-    | GoHome -> "home"
-    | SetHome(a,b) -> "sethome " + a.ToString() + ", " + b.ToString()
-    | SetDimensions(a,b) -> "setdimensions " + a.ToString() + ", " + b.ToString()
-    | PenRGB(a,b,c) -> "penrgb " + a.ToString() + ", " + b.ToString()+ ", " + c.ToString()
+    if debug then 
+        match e with
+        | StringExpr s -> "\"" + s + "\""
+        | NumExpr n -> n.ToString()
+        | Seq(e1,e2) -> prettyprint e1 + ";\n" + prettyprint e2
+        | Ahead dist -> "ahead(" + dist.ToString() + ")"
+        | Behind dist -> "behind(" + dist.ToString() + ")"
+        | Clockwise degrees -> "clockwise(" + degrees.ToString() + ")"
+        | Counterwise degrees -> "counterwise(" + degrees.ToString() + ")"
+        | Press -> "press"
+        | Lift -> "lift"
+        | Pencolor(str) -> "pencolor " + (str)
+        | Penred(x) -> "penred " + (x.ToString())
+        | Pengreen(x) -> "pengreen " + (x.ToString())
+        | Penblue(x) -> "penblue " + (x.ToString())
+        | Penwidth(i) -> "penwidth " + i.ToString()
+        | Loop(i,e) -> "loop (" + i.ToString() + ")" + prettyprint e
+        | Assign(v,e) -> v + " = " + e.ToString()
+        | UnaryIncrement(str) -> str + "++"
+        | Increment(str,e) -> str + " += " + e.ToString()
+        | UnaryDecrement(str) -> str + "--"
+        | Decrement(str,e) -> str + " -= " + e.ToString()
+        | GoHome -> "home"
+        | SetHome(a,b) -> "sethome " + a.ToString() + ", " + b.ToString()
+        | SetDimensions(a,b) -> "setdimensions " + a.ToString() + ", " + b.ToString()
+        | PenRGB(a,b,c) -> "penrgb " + a.ToString() + ", " + b.ToString()+ ", " + c.ToString()
+    else ""
 
 // for debugging
 let valueprint v : string =
-    match v with
-    | ValueString s -> s
-    | ValueNum n -> n.ToString()
+    if debug then
+        match v with
+        | ValueString s -> s
+        | ValueNum n -> n.ToString()
+    else ""
 
 let getnumval (v : Expr) (s : State) : int =
     match v with
