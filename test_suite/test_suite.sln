@@ -7,6 +7,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "lang", "lang\lang.fsproj", 
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ProjectParserTests", "ProjectParserTests\ProjectParserTests.fsproj", "{8090508A-E122-42FA-B450-9ED6097AEDE7}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ProjectInterpreterTests", "ProjectInterpreterTests\ProjectInterpreterTests.fsproj", "{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{8090508A-E122-42FA-B450-9ED6097AEDE7}.Release|x64.Build.0 = Release|Any CPU
 		{8090508A-E122-42FA-B450-9ED6097AEDE7}.Release|x86.ActiveCfg = Release|Any CPU
 		{8090508A-E122-42FA-B450-9ED6097AEDE7}.Release|x86.Build.0 = Release|Any CPU
+		{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}.Debug|x64.Build.0 = Debug|Any CPU
+		{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}.Debug|x86.Build.0 = Debug|Any CPU
+		{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}.Release|x64.ActiveCfg = Release|Any CPU
+		{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}.Release|x64.Build.0 = Release|Any CPU
+		{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}.Release|x86.ActiveCfg = Release|Any CPU
+		{B6E452E8-E97C-4F20-86EC-8C5A577CC82D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

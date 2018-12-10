@@ -5,7 +5,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ProjectParser
 
 [<TestClass>]
-type TestClass () =
+type ParserTestClass () =
 
     [<TestMethod>]
     member this.SeqParses () =
