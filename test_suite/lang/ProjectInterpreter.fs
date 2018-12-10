@@ -3,7 +3,7 @@ open ProjectParser
 open Parser
 open System
 
-let debug = false
+let debug = true
 let PI = 3.14159265358979
 let round (x:float) = int(Math.Round(x))
 

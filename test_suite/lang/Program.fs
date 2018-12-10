@@ -5,6 +5,8 @@ open ProjectParser
 open ProjectInterpreter
 open System.ComponentModel
 
+let debug = true
+
 let svgDraw guts (s: State) =
     // default canvas size of 600x400px 
     let (_,_,_,_,b) = s
@@ -58,7 +60,10 @@ let canvasSVGize (c:Canvas) : string =
         | [] -> ""
     svglist (pl c)
 
-let createSVG (x: State) =
+let createSVG input aState =
+    let x = match input with
+            | Some expr ->  (eval expr aState)
+            | None -> aState
     let (c,_,_,_,_) = x
     let svg = svgDraw (canvasSVGize c) x
     printfn "Writing an SVG to a file and opening with your web browser..."
@@ -84,6 +89,12 @@ let argparse argv =
             usage()
     n
 
+let argmsg input =
+    match input with
+        | Some expr -> printfn "Parse completed."
+                       if debug then printfn "You entered: %s" (prettyprint expr)
+        | None -> printfn "Did not parse. Enter a valid Zig expression."    
+
 [<EntryPoint>]
 let main argv =
     // default State
@@ -92,26 +103,12 @@ let main argv =
     // reading in .zig files
     if argv.[0].Contains ".zig" then 
         let readLines = File.ReadAllLines(argv.[0]) |> String.concat("")
-        let altInput = parse readLines
-        match altInput with
-        | Some expr -> printfn "%s" (prettyprint expr)
-        | None -> printfn "nope"
-        let x = match altInput with
-                | Some expr ->  (eval expr aState)
-                | None -> aState
-        let (c,_,_,_,_) = x
-        createSVG x
+        let fileinput = parse readLines
+        argmsg fileinput
+        createSVG fileinput aState
+
     // reading in user input from command line
     else 
-    let input = parse (argparse argv)
-
-    // for debugging
-    match input with
-    | Some expr -> printfn "%s" (prettyprint expr)
-    | None -> printfn "Did not parse. Enter a valid Zig expression."
-
-    let x = match input with
-            | Some expr ->  (eval expr aState)
-            | None -> aState
-    let (c,_,_,_,_) = x
-    createSVG x
+        let input = parse (argparse argv)
+        argmsg input
+        createSVG input aState
