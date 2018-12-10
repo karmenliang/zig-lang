@@ -26,8 +26,7 @@ let initGraphicsProcess(svgpath: string): Process =
     // look to see if OS is Mac or Windows; Windows is "explorer.exe" Mac is "open"
     // still doesn't work
     let os = match int Environment.OSVersion.Platform with
-             | 4 | 128 -> "open " // Linux
-             | 6 -> "open " // OSX
+             | 6 | 4 -> "open " // OSX or Unix
              | _ -> "explorer.exe " // Windows
     let info = new ProcessStartInfo (
                  FileName = "/bin/bash",
@@ -60,7 +59,7 @@ let canvasSVGize (c:Canvas) : string =
         | [] -> ""
     svglist (pl c)
 
-let createSVG input aState =
+let createSVG (input : Expr option) (aState : State) : int =
     let x = match input with
             | Some expr ->  (eval expr aState)
             | None -> aState
@@ -89,7 +88,7 @@ let argparse argv =
             usage()
     n
 
-let argmsg input =
+let argmsg (input : Expr option) =
     match input with
         | Some expr -> printfn "Parse completed."
                        if debug then printfn "You entered: %s" (prettyprint expr)
