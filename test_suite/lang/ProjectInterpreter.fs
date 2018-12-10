@@ -83,37 +83,27 @@ let rec prettyprint e : string =
         | PenRGB(a,b,c) -> "penrgb " + a.ToString() + ", " + b.ToString()+ ", " + c.ToString()
     else ""
 
-// for debugging
-let valueprint v : string =
-    if debug then
-        match v with
-        | ValueString s -> s
-        | ValueNum n -> n.ToString()
-    else ""
-
-exception ValueStringError of string
-exception NumExprError of string
-
-let getnumval (v : Expr) (s : State) =
+let getnumval (v : Expr) (s : State) : int =
     match v with
-    // extract value of variable from Context Map
+    // if arg is a variable, extract value from Context Map
     | StringExpr sv -> 
         let (c,t,p,ctx,b) = s
-        let n =
-            try
-                Map.find sv ctx
-            with
-                :? System.Collections.Generic.KeyNotFoundException as e -> 
-                    printfn "%s is not a valid variable." sv
-                    ValueString ""
-        // variable must hold a number value
-        match n with
-        | ValueNum num -> num
-        | ValueString vs -> invalidArg vs "Variable is not a number."
-   // extract number from NumExpr type
+        if (Map.containsKey sv ctx) then
+            let n = match (Map.find sv ctx) with
+                    | ValueNum num -> num
+                    | ValueString vs -> invalidArg sv ("Variable " + sv + " is not a number.")
+            n
+        else printfn "%s is a nonexistent variable." sv; 0
     | NumExpr n -> n
     // any other Expr is incorrect (not a variable or a number)
-    | _ -> failwith "Argument must be a variable or number."
+    | _ -> invalidArg "arg" "Argument must be a variable or number"
+
+// catch invalid argument exceptions from getnumval
+let getnum (v : Expr) (s : State) : int =
+    try 
+        getnumval v s
+    with 
+        :? System.ArgumentException as e -> printfn "%s" e.Message; 0
 
 // default: pen is down and angle is PI/2
 let rec eval e s: State =
@@ -121,22 +111,22 @@ let rec eval e s: State =
     | StringExpr sv -> s
     | NumExpr n -> s
     | Ahead arg ->
-        let dist = getnumval arg s
+        let dist = getnum arg s
         let x' = (xget s)-(xcomp s dist)
         let y' = (yget s)-(ycomp s dist)
         xychange s x' y'
     | Behind arg ->
-        let dist = getnumval arg s
+        let dist = getnum arg s
         let x' = (xget s)+(xcomp s dist)
         let y' = (yget s)+(ycomp s dist)
         xychange s x' y'
     | Clockwise arg ->
-        let degs = getnumval arg s
+        let degs = getnum arg s
         let radians = toradians (float degs)
         let a' = (aget s) + radians
         achange s a'
     | Counterwise arg ->
-        let degs = getnumval arg s
+        let degs = getnum arg s
         let radians = toradians (float degs)
         let a' = (aget s) - radians
         achange s a'
@@ -161,34 +151,34 @@ let rec eval e s: State =
         | "blue" -> (c,t,Pen(w,(0,0,255),d),ctx,b)
         | _ -> (c,t,Pen(w,(0,0,0),d),ctx,b)
     | Penred arg ->
-        let comp = getnumval arg s
+        let comp = getnum arg s
         let (c,t,p,ctx,bound) = s
         let (w,rgb,d) = p
         let (_,g,b) = rgb
         let rgb' = (comp,g,b)
         (c,t,Pen(w,rgb',d),ctx,bound)
     | Pengreen arg ->
-        let comp = getnumval arg s
+        let comp = getnum arg s
         let (c,t,p,ctx,bound) = s
         let (w,rgb,d) = p
         let (r,g,b) = rgb
         let rgb' = (r,comp,b)
         (c,t,Pen(w,rgb',d),ctx,bound)
     | Penblue arg ->
-        let comp = getnumval arg s
+        let comp = getnum arg s
         let (c,t,p,ctx,bound) = s
         let (w,rgb,d) = p
         let (r,g,b) = rgb
         let rgb' = (r,g,comp)
         (c,t,Pen(w,rgb',d),ctx,bound)
     | Penwidth arg ->
-        let width = getnumval arg s
+        let width = getnum arg s
         if width < 1 then failwith "Pen width must be positive"
         let (c,t,p,ctx,bound) = s
         let (_,color,d) = p
         (c,t,Pen(width,color,d),ctx,bound)
     | Loop(arg,e) ->
-        let i = getnumval arg s
+        let i = getnum arg s
         if (i > 0) then
             let s1 = eval e s
             eval (Loop(NumExpr (i-1),e)) s1
@@ -200,13 +190,10 @@ let rec eval e s: State =
         match e with
         | StringExpr sv ->
             let ctx1 = Map.add str (ValueString sv) ctx
-            printfn "assign stringval: %A" ctx1
             (c,t,p,ctx1,bound)
         | NumExpr n ->
             let ctx1 = Map.add str (ValueNum n) ctx
-            printfn "assign numval: %A" ctx1
             (c,t,p,ctx1,bound)
-        // BUG: does not properly assign Exprs
         | _ ->
         //    let ctx1 = Map.add str (ValueExpr e) ctx
         //    printf "assign exprval: %A" ctx1
@@ -252,9 +239,9 @@ let rec eval e s: State =
             (c',t',p,ctx,bound)
         else (c,t',p,ctx,bound)
     | SetHome(a,b) ->
-        let acomp = getnumval a s
+        let acomp = getnum a s
         if acomp < 1 then failwith "xcomp must be positive"
-        let bcomp = getnumval b s
+        let bcomp = getnum b s
         if bcomp < 1 then failwith "ycomp must be positive"
         let (c,t,p,ctx,bound) = s
         let (d,h) = bound
@@ -262,9 +249,9 @@ let rec eval e s: State =
         let bound' = (d,h')
         (c,t,p,ctx,bound')
     | SetDimensions(a,b) ->
-        let acomp = getnumval a s
+        let acomp = getnum a s
         if acomp < 1 then failwith "xcomp must be positive"
-        let bcomp = getnumval b s
+        let bcomp = getnum b s
         if bcomp < 1 then failwith "ycomp must be positive"
         let (c,t,p,ctx,bound) = s
         let (d,h) = bound
@@ -272,9 +259,9 @@ let rec eval e s: State =
         let bound' = (d',h)
         (c,t,p,ctx,bound')
     | PenRGB(rarg,garg,barg) ->
-        let rcomp = getnumval rarg s
-        let gcomp = getnumval garg s
-        let bcomp = getnumval barg s
+        let rcomp = getnum rarg s
+        let gcomp = getnum garg s
+        let bcomp = getnum barg s
         let (c,t,p,ctx,bound) = s
         let (w,rgb,d) = p
         let (r,g,b) = rgb
