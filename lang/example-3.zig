@@ -1,3 +1,1 @@
-pc yellow; 
-a 25; pc red; a 25; lift; cw 90; a 50; 
-cw 90; press; pc blue; a 25; pc green; a 25
+let x = 0; let y = 255; loop (100){clockwise 5; penrgb 255,y,x; loop (4){ahead 100; clockwise 90}; x += 4; y -= 4
