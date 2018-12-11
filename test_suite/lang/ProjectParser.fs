@@ -93,7 +93,7 @@ let sethome = pright (pstr "sethome ") (pseq pvalue (pright (pstr ",") (pright p
 let setdimensions = pright (pstr "setdim ") (pseq pvalue (pright (pstr ",") (pright pws0 pvalue)) (fun (a,b) -> SetDimensions(a,b))) <!> "setdeminensions"
 let penrgb = pright (pstr "penrgb ") (pseq (pseq pvalue (pright (pstr ",") (pright pws0 pvalue)) (fun (a,b) -> (a,b))) (pright (pstr ",") (pright pws0 pvalue)) (fun ((a,b),c) -> PenRGB(a,b,c)))
 let nonrecexpr =  ahead <|> a <|> behind <|> b <|> clockwise <|> cw <|> counterwise <|> ccw <|> press <|> lift <|> pencolor <|> pc <|> penred <|> pengreen <|> penblue <|> penwidth <|> pw <|> assign <|> unaryincrement <|> increment <|> unarydecrement <|> decrement <|> home <|> sethome <|> setdimensions <|> penrgb <|> loop <!> "nonrecexpr"
-let seq = pseq (pleft nonrecexpr (pseq (pstr ";") pws0 (fun (x,y) -> null))) expr (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
+let seq = pseq (pleft nonrecexpr (pseq (pstr ";") (pseq (pmany0 pnl) pws0 (fun (a,b) -> null)) (fun (x,y) -> null))) (pleft expr (pseq (pmany0 pnl) pws0 (fun (a,b) -> null))) (fun (e1,e2) -> Seq(e1,e2)) <!> "seq"
 exprImpl := seq <|> nonrecexpr <!> "expr"
 let grammar = pleft expr peof <!> "grammar"
 
