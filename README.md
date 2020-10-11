@@ -1,2 +1,3 @@
-# cs334-hw9-starter
-CS334 HW9 starter
+# Zig Language
+
+A programming language for drawing vector graphics, for CS334 Principles of Programming Languages Fall 2018.
